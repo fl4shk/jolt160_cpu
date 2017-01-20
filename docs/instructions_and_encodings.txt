@@ -31,16 +31,15 @@ Group 1 (Non-branching instructions with 8-bit immediate values):
       1. addi (ADD 8-bit Immediate value to reg Pair rAp)
       2. subi (SuBtract 8-bit Immediate value from reg Pair rAp)
       3. cmpi (CoMPare reg pair rAp to 8-bit Immediate value)
-      4. cmpbi (CoMPare register rA to 8-bit Immediate value)
-    
+      
     Bitshifting instructions with two operands (rAp and 8-bit Immediate
     value):
-      5. lsli
-      6. lsri
-      7. asri
+      4. lsli
+      5. lsri
+      6. asri
       
     Copy instructions:
-      8. cpybi (CoPY Byte Immediate to register rA)
+      7. cpybi (CoPY Byte Immediate to register rA)
 
 
 Group 2 (The instruction group with the most opcodes):  
@@ -52,9 +51,6 @@ Group 2 (The instruction group with the most opcodes):
     significant bit of bbbb is ignored] (b)
   Instructions:  
     -- rA, rB --
-    
-    Arithmetic instructions:
-      cmpb
     
     Copy instructions:
     (CoPY from reg rB to reg rA)
@@ -116,11 +112,25 @@ Group 2 (The instruction group with the most opcodes):
       sub
       sbc
       cmp
+      umull (Unsigned MULtiplies rAp and rBp and stores 32-bit result in
+      r0p:r2p)
+      smull (Signed MULtiplies rAp and rBp and stores 32-bit result in
+      r0p:r2p)
     
     Bitwise instructions with two reg pair operands:
       and
+      tst (same thing as "and" but only affects flags)
       orr
       xor
+    
+    Bitshifting (and rotating) instructions that do a 16-bit shift
+    or rotate on the reg pair rAp, using rBp as the number of bits to
+    shift by:
+      lsl
+      lsr
+      asr
+      rol
+      ror
     
     (CoPY from reg pair rBp to reg Pair rAp)
       cpy
@@ -136,14 +146,6 @@ Group 2 (The instruction group with the most opcodes):
       stpsa (STore reg Pair rAp to memory at address contained in reg pair
       rBp, then Subtract 1 from the reg pair rBp)
     
-    Bitshifting (and rotating) instructions that do a 16-bit shift
-    or rotate on the reg pair rAp, using rBp as the number of bits to
-    shift by:
-      lsl
-      lsr
-      asr
-      rol
-      ror
     
     
     
@@ -153,6 +155,9 @@ Group 2 (The instruction group with the most opcodes):
       eni (ENable Interrupts)
       dii (DIsable Interrupts)
       reti (Set the PC to interrupt RETurn address and enable Interrupts)
+      jumpira (Set the PC to the Interrupt Return Address, but DON'T enable
+      interrupts)
+
 
 
 

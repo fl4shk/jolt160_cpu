@@ -1,0 +1,60 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef alu_vars_svinc
+`define alu_vars_svinc
+
+// PC incrementer inputs and outputs
+bit [`cpu_imm_value_16_msb_pos:0] the_pc_inc_pc_in, the_pc_inc_offset_in;
+wire [`cpu_imm_value_16_msb_pos:0] the_pc_inc_pc_out;
+//bit [`cpu_imm_value_16_msb_pos:0] the_pc_inc_pc_out;
+
+
+// PC adjuster inputs and outputs
+//addsub_oper pc_adjuster_op;
+bit [`alu_inout_msb_pos:0] pc_adjuster_a_in_hi, pc_adjuster_a_in_lo, 
+	pc_adjuster_b_in_hi, pc_adjuster_b_in_lo; 
+//bit [`proc_flags_msb_pos:0] dummy_pc_adjuster_proc_flags_in;
+bit [`cpu_reg_msb_pos:0] pc_adjuster_out_hi, pc_adjuster_out_lo;
+bit [`proc_flags_msb_pos:0] pc_adjuster_proc_flags_out;
+
+
+// ALU inputs and outputs
+alu_oper the_alu_op;
+bit [`alu_inout_msb_pos:0] alu_a_in_hi, alu_a_in_lo, alu_b_in_hi,
+	alu_b_in_lo; 
+bit [`proc_flags_msb_pos:0] alu_proc_flags_in;
+bit [`alu_inout_msb_pos:0] alu_out_hi, alu_out_lo;
+bit [`proc_flags_msb_pos:0] alu_proc_flags_out;
+
+// The CPU flags that the ALU becomes made aware of 
+bit [`proc_flags_msb_pos:0] true_proc_flags;
+bit alu_was_used, alu_dest_reg_was_modded, alu_dest_rpair_was_modded,
+	alu_modded_proc_flags;
+
+//bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_reg_index;
+////bit [`cpu_rp_index_ie_msb_pos:0] alu_dest_rpair_index;
+//bit [`cpu_reg_index_ie_msb_pos:0] alu_dest_rpair_index;
+////bit alu_dest_reg_is_temp, alu_dest_rpair_is_temp;
+bit [`all_regs_index_msb_pos:0] alu_dest_reg_index;
+bit [`all_regs_index_msb_pos:0] alu_dest_rpair_index;
+
+
+
+
+
+`endif		// alu_vars_svinc

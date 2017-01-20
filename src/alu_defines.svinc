@@ -1,0 +1,112 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef alu_defines_svinc
+`define alu_defines_svinc
+
+
+`include "src/global_macros.svinc"
+`include "src/cpu_extras_defines.svinc"
+
+// ALU constants
+
+
+// Adder-Subtractor operation number of bits and most significant bit
+// position
+`define addsub_op_width 4
+`define addsub_op_msb_pos ( `width_to_msb_pos(`addsub_op_width) )
+
+
+// ALU operation number of bits and most significant bit position
+`define alu_op_width 5
+`define alu_op_msb_pos ( `width_to_msb_pos(`alu_op_width) )
+
+// ALU input/output number of bits and most significant bit position
+`define alu_inout_width `cpu_reg_width
+//`define alu_inout_width 4
+//`define alu_inout_width 2
+`define alu_inout_msb_pos ( `width_to_msb_pos(`alu_inout_width) )
+
+`define alu_inout_pair_width ( `alu_inout_width + `alu_inout_width )
+`define alu_inout_pair_msb_pos ( `width_to_msb_pos(`alu_inout_pair_width) )
+
+
+
+
+//// ALU operation category defines
+//
+//// -- alu_op_cat_16_no_ci --
+//// Arithmetic operations
+//// Addition operations
+//`define alu_op_add_cat (alu_op_cat_16_no_ci)
+//
+//// Subtraction operations
+//`define alu_op_sub_cat (alu_op_cat_16_no_ci)
+//
+//// Bitwise operations
+//// Operations analogous to logic gates (none of these affect carry)
+//`define alu_op_and_cat (alu_op_cat_16_no_ci)
+//`define alu_op_orr_cat (alu_op_cat_16_no_ci)
+//`define alu_op_xor_cat (alu_op_cat_16_no_ci)
+//
+//// Complement operations
+//`define alu_op_inv_cat (alu_op_cat_16_no_ci)
+//`define alu_op_neg_cat (alu_op_cat_16_no_ci)
+//
+//
+//
+//// -- alu_op_cat_16_ci --
+//// Arithmetic operations
+//// Addition operations
+//`define alu_op_adc_cat (alu_op_cat_16_ci)
+//
+//// Subtraction operations
+//`define alu_op_sbc_cat (alu_op_cat_16_ci)
+//
+//
+//
+//// -- alu_op_cat_16_no_ci --
+//// Arithmetic operations
+//// Addition operations
+//`define alu_op_addpb_cat (alu_op_cat_16_no_ci)
+//`define alu_op_addpsnx_cat (alu_op_cat_16_no_ci)
+//
+//// Subtraction operations
+//`define alu_op_subpb_cat (alu_op_cat_16_no_ci)
+//
+//// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo } by b_in
+//// bits
+//`define alu_op_lsl_cat (alu_op_cat_16_no_ci)
+//`define alu_op_lsr_cat (alu_op_cat_16_no_ci)
+//`define alu_op_asr_cat (alu_op_cat_16_no_ci)
+//
+//// 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo } by [b_in
+//// % inout_width] bits
+//`define alu_op_rol_cat (alu_op_cat_16_no_ci)
+//`define alu_op_ror_cat (alu_op_cat_16_no_ci)
+//
+//
+//
+//// -- alu_op_cat_16_ci --
+//// Bit rotating instructions that use carry as bit 16 for a 17-bit rotate
+//// of { carry, a_in_hi, a_in_lo } by one bit:
+//`define alu_op_rolc_cat (alu_op_cat_16_ci)
+//`define alu_op_rorc_cat (alu_op_cat_16_ci)
+
+
+
+`endif		// alu_defines_svinc

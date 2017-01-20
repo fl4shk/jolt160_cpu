@@ -1,0 +1,59 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef extra_wire_assignments_svinc
+`define extra_wire_assignments_svinc
+
+
+
+
+
+
+assign { init_instr_is_32_bit, final_instr_is_32_bit }
+	= { pkg_instr_dec::get_instr_is_32_bit(init_instr_grp),
+	pkg_instr_dec::get_instr_is_32_bit(final_instr_grp) };
+
+assign final_ig1_instr_is_ldst
+	= pkg_instr_dec::ig1_get_instr_is_ldst(final_ig1_opcode);
+assign final_ig2_instr_is_ldst
+	= pkg_instr_dec::ig2_get_instr_is_ldst(final_ig2_opcode);
+assign final_ig3_instr_is_ldst
+	= pkg_instr_dec::ig3_get_instr_is_ldst(final_ig3_opcode);
+assign final_ig4_instr_is_ldst
+	= pkg_instr_dec::ig4_get_instr_is_ldst(final_ig4_opcode);
+assign final_ig5_instr_is_ldst
+	= pkg_instr_dec::ig5_get_instr_is_ldst(final_ig5_opcode);
+assign final_instr_is_ldst 
+	= ( ( final_instr_grp == pkg_instr_dec::instr_grp_1
+	&& final_ig1_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_2
+	&& final_ig2_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_3
+	&& final_ig3_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_4
+	&& final_ig4_instr_is_ldst )
+	|| ( final_instr_grp == pkg_instr_dec::instr_grp_5
+	&& final_ig5_instr_is_ldst ) );
+
+
+assign final_branch_was_taken
+	= ( ( final_instr_grp == pkg_instr_dec::instr_grp_4 )
+	&& pkg_instr_dec::ig4_get_branch_was_taken( final_ig4_opcode,
+	true_proc_flags ) );
+
+
+`endif		// extra_wire_assignments_svinc

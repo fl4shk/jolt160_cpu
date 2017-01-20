@@ -1,0 +1,107 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+`ifndef cpu_extras_defines_svinc
+`define cpu_extras_defines_svinc
+
+
+`include "src/global_macros.svinc"
+//`include "src/instr_decoder_defines.svinc"
+
+`define proc_flags_width 4
+`define proc_flags_msb_pos \
+	(`width_to_msb_pos(`proc_flags_width))
+
+
+// General register constants
+
+// 16 GPRs
+`define cpu_num_regs 16
+
+// 8 GPR pairs
+`define cpu_num_reg_pairs 8
+
+
+// Instruction encoding things
+`define cpu_reg_index_ie_width 4
+`define cpu_reg_index_ie_msb_pos \
+	( `width_to_msb_pos(`cpu_reg_index_ie_width) )
+
+`define cpu_rp_index_ie_width 3
+`define cpu_rp_index_ie_msb_pos \
+	( `width_to_msb_pos(`cpu_rp_index_ie_width) )
+
+// ALU operations stuff
+`define all_regs_index_width 5
+`define all_regs_index_msb_pos ( `width_to_msb_pos(`all_regs_index_width) )
+
+
+// Register widths and most significant bit positions
+`define cpu_reg_width 8
+`define cpu_reg_msb_pos ( `width_to_msb_pos(`cpu_reg_width) )
+
+`define cpu_rp_width 16
+`define cpu_rp_msb_pos ( `width_to_msb_pos(`cpu_rp_width) )
+
+// Immediate value widths and most significant bit positions
+`define cpu_imm_value_8_width `cpu_reg_width
+`define cpu_imm_value_8_msb_pos `cpu_reg_msb_pos
+
+`define cpu_imm_value_16_width `cpu_rp_width
+`define cpu_imm_value_16_msb_pos `cpu_rp_msb_pos
+
+
+// CPU Register array size stuff
+//`define cpu_reg_arr_width 16
+
+`define cpu_reg_arr_width 18
+`define cpu_reg_arr_msb_pos ( `width_to_msb_pos(`cpu_reg_arr_width) )
+
+
+// Non-instruction data in/out size stuff (8-bit because during instruction
+// execution, the CPU can only load or store one byte at a time)
+`define cpu_data_inout_8_width `cpu_reg_width
+`define cpu_data_inout_8_msb_pos `cpu_reg_msb_pos
+
+// Instruction data size stuff (16-bit
+`define cpu_data_inout_16_width `cpu_rp_width
+`define cpu_data_inout_16_msb_pos `cpu_rp_msb_pos
+
+
+
+// Addressing stuff
+`define cpu_addr_width `cpu_rp_width
+`define cpu_addr_msb_pos `cpu_rp_msb_pos
+ 
+// CPU state stuff
+`define cpu_state_width 4
+`define cpu_state_msb_pos ( `width_to_msb_pos(`cpu_state_width) )
+
+// Macros
+`define make_pair( arr, index_hi ) { arr[index_hi], arr[ index_hi + 1 ] }
+`define make_quad( arr, index_hi ) { arr[index_hi], arr[ index_hi + 1 ], \
+	arr[ index_hi + 2 ], arr[ index_hi + 3 ] }
+
+
+
+// Vector stuff
+`define cpu_reset_start_addr_storage_addr (`cpu_addr_width'h8000)
+`define cpu_int_start_addr_storage_addr (`cpu_addr_width'h8002)
+
+
+
+`endif		// cpu_extras_defines_svinc

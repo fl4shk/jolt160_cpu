@@ -1,0 +1,120 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef extra_instr_dec_vars_svinc
+`define extra_instr_dec_vars_svinc
+
+// Instruction Group 1 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g1_op_msb_pos:0] ig1_opcode;
+wire [`cpu_reg_index_ie_msb_pos:0] ig1_ra_index;
+wire [`instr_g1_imm_value_msb_pos:0] ig1_imm_value_8;
+wire ig1_ra_index_is_for_pair;
+
+bit [`instr_g1_op_msb_pos:0] final_ig1_opcode;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig1_ra_index;
+bit [`instr_g1_imm_value_msb_pos:0] final_ig1_imm_value_8;
+bit final_ig1_ra_index_is_for_pair;
+
+//wire ig1_instr_changes_pc;
+bit final_ig1_pc_contains_ra, final_ig1_pc_contains_rap;
+
+
+
+// Instruction Group 2 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g2_op_msb_pos:0] ig2_opcode;
+wire [`cpu_reg_index_ie_msb_pos:0] ig2_ra_index;
+wire [`cpu_reg_index_ie_msb_pos:0] ig2_rb_index;
+wire ig2_ra_index_is_for_pair, ig2_rb_index_is_for_pair;
+
+bit [`instr_g2_op_msb_pos:0] final_ig2_opcode;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig2_ra_index;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig2_rb_index;
+bit final_ig2_ra_index_is_for_pair, final_ig2_rb_index_is_for_pair;
+
+//wire ig2_pc_check_ra, ig2_pc_check_rb, ig2_pc_check_rap, ig2_pc_check_rbp;
+
+//wire ig2_instr_changes_pc;
+
+bit final_ig2_pc_contains_ra, final_ig2_pc_contains_rb,
+	final_ig2_rap_is_pc, final_ig2_rbp_is_pc;
+
+
+
+// Instruction Group 3 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g3_op_msb_pos:0] ig3_opcode;
+wire [`cpu_reg_index_ie_msb_pos:0] ig3_ra_index;
+wire [`cpu_reg_index_ie_msb_pos:0] ig3_rbp_index;
+wire [`cpu_reg_index_ie_msb_pos:0] ig3_rcp_index;
+
+bit [`instr_g3_op_msb_pos:0] final_ig3_opcode;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig3_ra_index;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig3_rbp_index;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig3_rcp_index;
+
+//wire ig3_instr_changes_pc;
+bit final_ig3_pc_contains_ra, final_ig3_rbp_is_pc, final_ig3_rcp_is_pc;
+
+
+
+// Instruction Group 4 Instruction Execution Things
+// ALL Instructions in group 4 change the PC
+// Get rid of some boilerplate
+wire [`instr_g4_op_msb_pos:0] ig4_opcode;
+wire [`instr_g4_imm_value_msb_pos:0] ig4_imm_value_8;
+
+bit [`instr_g4_op_msb_pos:0] final_ig4_opcode;
+bit [`instr_g4_imm_value_msb_pos:0] final_ig4_imm_value_8;
+
+
+// Instruction Group 5 Instruction Execution Things
+// Get rid of some boilerplate
+wire [`instr_g5_op_msb_pos:0] ig5_opcode;
+wire [`cpu_reg_index_ie_msb_pos:0] ig5_ra_index;
+wire [`cpu_reg_index_ie_msb_pos:0] ig5_rbp_index;
+wire ig5_ra_index_is_for_pair;
+
+bit [`instr_g5_op_msb_pos:0] final_ig5_opcode;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig5_ra_index;
+bit [`cpu_reg_index_ie_msb_pos:0] final_ig5_rbp_index;
+bit final_ig5_ra_index_is_for_pair;
+//wire ig5_instr_changes_pc;
+
+bit final_ig5_pc_contains_ra, final_ig5_rap_is_pc, final_ig5_rbp_is_pc;
+
+// If the instruction is a branch or call instruction (or reti)
+bit instr_is_branch_or_call;
+// If the pc was POSSIBLY changed by a non-branch, non-call
+// instruction
+bit non_bc_instr_possibly_changes_pc;
+
+wire init_instr_is_32_bit, final_instr_is_32_bit;
+
+wire final_ig1_instr_is_ldst, final_ig2_instr_is_ldst,
+	final_ig3_instr_is_ldst, final_ig4_instr_is_ldst,
+	final_ig5_instr_is_ldst;
+wire final_instr_is_ldst;
+
+//bit final_instr_is_ldst;
+
+
+
+
+`endif		// extra_instr_dec_vars_svinc

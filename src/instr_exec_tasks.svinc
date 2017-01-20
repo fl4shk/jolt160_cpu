@@ -1,0 +1,387 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef instr_exec_tasks_svinc
+`define instr_exec_tasks_svinc
+
+
+
+
+task set_reg;
+	input [`all_regs_index_msb_pos:0] reg_index;
+	input [`cpu_reg_msb_pos:0] val;
+	
+	cpu_regs[reg_index] <= val;
+	
+	if ( reg_index == pkg_cpu::cpu_rp_pc_hi_rind )
+	begin
+		data_inout_addr[`cpu_rp_msb_pos:`cpu_reg_width] <= val;
+	end
+	
+	else if ( reg_index == pkg_cpu::cpu_rp_pc_lo_rind )
+	begin
+		data_inout_addr[`cpu_reg_msb_pos:0] <= val;
+	end
+	
+endtask
+
+task set_reg_pair_with_pi;
+	input [`all_regs_index_msb_pos:0] pair_index;
+	input [`cpu_rp_msb_pos:0] val;
+	
+	
+	//$display( "pair_index, val:  %h, %h", pair_index, val );
+	`make_reg_pair_w_pi(pair_index) <= val;
+	if ( pair_index == pkg_cpu::cpu_rp_pc_pind )
+	begin
+		data_inout_addr <= val;
+	end
+	
+endtask
+
+task finish_alu_op_with_dest_reg;
+	if (alu_dest_reg_was_modded)
+	begin
+		//$display( "ALU dest reg WAS modded:  %d %h %h", alu_dest_reg_index,
+		//	cpu_regs[alu_dest_reg_index], `get_alu_out_8 );
+		//$display( "Finish ALU op with dest reg:  %d %h %h", 
+		//	alu_dest_reg_index, cpu_regs[alu_dest_reg_index], 
+		//	`get_alu_out_8 );
+		//cpu_regs[alu_dest_reg_index] <= `get_alu_out_8;
+		set_reg( alu_dest_reg_index, `get_alu_out_8 );
+	end
+	//else
+	//begin
+	//	$display("ALU dest reg was NOT modded");
+	//end
+	
+	if (alu_modded_proc_flags)
+	begin
+		true_proc_flags <= alu_proc_flags_out;
+	end
+endtask
+
+task finish_alu_op_with_dest_rpair;
+	if (alu_dest_rpair_was_modded)
+	begin
+		//`make_reg_pair_w_pi(alu_dest_rpair_index) <= `get_alu_out_16;
+		set_reg_pair_with_pi( alu_dest_rpair_index, `get_alu_out_16 );
+	end
+	if (alu_modded_proc_flags)
+	begin
+		true_proc_flags <= alu_proc_flags_out;
+	end
+endtask
+
+//task finish_alu_op_with_dest_val_16;
+//	output [`cpu_addr_msb_pos:0] val_16_out;
+//	
+//	if (alu_dest_rpair_was_modded)
+//	begin
+//		val_16_out <= `get_alu_out_16;
+//	end
+//	if (alu_modded_proc_flags)
+//	begin
+//		true_proc_flags <= alu_proc_flags_out;
+//	end
+//endtask
+
+task exec_any_call;
+	input [`cpu_imm_value_16_msb_pos:0] next_pc_and_dio_addr;
+	//$display( "exec_any_call:  second_prev_pc, third_prev_pc:  %h %h",
+	//	second_prev_pc, third_prev_pc );
+	//`get_cpu_rp_lr <= `get_cpu_rp_pc;
+	
+	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc 
+	//	: second_prev_pc );
+	`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? second_prev_pc 
+		: third_prev_pc );
+	//`get_cpu_rp_lr <= ( !final_instr_is_32_bit ? prev_pc
+	//	: second_prev_pc );
+	
+	set_pc_and_dio_addr(next_pc_and_dio_addr);
+endtask
+
+task finish_ig4_branch;
+	//$display("finish_ig4_branch");
+	seq_logic_grab_pc_adjuster_outputs();
+endtask
+
+
+
+
+// Start executing an instruction.  The instruction MAY only take one cycle
+// after being loaded.
+task start_exec_instr;
+	//$display("start_exec_instr()");
+	
+	case (final_instr_grp)
+		pkg_instr_dec::instr_grp_1:
+		begin
+			start_exec_instr_from_grp_1();
+		end
+		
+		pkg_instr_dec::instr_grp_2:
+		begin
+			start_exec_instr_from_grp_2();
+		end
+		
+		pkg_instr_dec::instr_grp_3:
+		begin
+			start_exec_instr_from_grp_3();
+		end
+		
+		pkg_instr_dec::instr_grp_4:
+		begin
+			start_exec_instr_from_grp_4();
+		end
+		
+		pkg_instr_dec::instr_grp_5:
+		begin
+			start_exec_instr_from_grp_5();
+		end
+	endcase
+endtask
+
+
+
+
+
+
+// Finish executing a instruction (second execution cycle of a multi-cycle
+// instruction)
+task finish_exec_ldst_instr;
+	//debug_disp_instr();
+	//$display();
+	
+	//req_rdwr <= 0;
+	
+	case (final_instr_grp)
+		pkg_instr_dec::instr_grp_1:
+		begin
+			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+				"Group 1 Load or Store Instruction!" );
+		end
+		
+		pkg_instr_dec::instr_grp_2:
+		begin
+			case (final_ig2_opcode)
+				pkg_instr_dec::instr_g2_op_ldr:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldr:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						//`get_final_ig2_reg_a <= temp_data_in;
+						set_reg( final_ig2_ra_index, temp_data_in );
+						$display("ldr:  Data IS READY");
+					end
+				end
+				pkg_instr_dec::instr_g2_op_str:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("str:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("str:  Data IS READY");
+					end
+				end
+				pkg_instr_dec::instr_g2_op_ldrab:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldrab:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						//`get_final_ig2_reg_a <= temp_data_in;
+						set_reg( final_ig2_ra_index, temp_data_in );
+						$display("ldrab:  Data IS READY");
+					end
+				end
+				pkg_instr_dec::instr_g2_op_strsa:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("strsa:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("strsa:  Data IS READY");
+					end
+				end
+				pkg_instr_dec::instr_g2_op_ldfab:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldfab:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						true_proc_flags <= temp_data_in;
+						$display("ldfab:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g2_op_stfsa:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("stfsa:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("stfsa:  Data IS READY");
+					end
+				end
+				
+				default:
+				begin
+					$display( "finish_exec_ldst_instr:  Uh oh!  ",
+						"Invalid Group 2 Load or Store Instruction!" );
+				end
+			endcase
+		end
+		
+		pkg_instr_dec::instr_grp_3:
+		begin
+			case (final_ig3_opcode)
+				pkg_instr_dec::instr_g3_op_ldrx:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldrx:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						//$display( "ldrx:  %h %h", final_ig3_ra_index,
+						//	temp_data_in );
+						//`get_final_ig3_reg_a <= temp_data_in;
+						set_reg( final_ig3_ra_index, temp_data_in );
+						$display("ldrx:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g3_op_strx:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("strx:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("strx:  Data IS READY");
+					end
+				end
+				
+				default:
+				begin
+					$display( "finish_exec_ldst_instr:  Uh oh!  ",
+						"Invalid Group 3 Load or Store Instruction!" );
+				end
+			endcase
+		end
+		
+		pkg_instr_dec::instr_grp_4:
+		begin
+			$display( "finish_exec_ldst_instr:  Uh oh!  Invalid ",
+				"Group 4 Load or Store Instruction!" );
+		end
+		
+		pkg_instr_dec::instr_grp_5:
+		begin
+			case (final_ig5_opcode)
+				pkg_instr_dec::instr_g5_op_ldrxi:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldrxi:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						//`get_final_ig5_reg_a <= temp_data_in;
+						set_reg( final_ig5_ra_index, temp_data_in );
+						$display("ldrxi:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g5_op_strxi:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("strxi:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("strxi:  Data IS READY");
+					end
+				end
+				
+				default:
+				begin
+					$display( "finish_exec_ldst_instr:  Uh oh!  ",
+						"Invalid Group 5 Load or Store Instruction!" );
+				end
+			endcase
+		end
+	endcase
+	
+	//if (!non_bc_instr_possibly_changes_pc)
+	//begin
+	//	prep_load_instr_hi_generic();
+	//end
+	//
+	//else // if (non_bc_instr_possibly_changes_pc)
+	//begin
+	//	prep_update_pc_etc_after_ipc();
+	//end
+	
+	//start_exec_shared_non_ldst_suffix();
+	
+	//$display("waiting\t\ta\t\tcycle");
+	
+	
+	if (data_ready)
+	begin
+		prep_load_instr_hi_generic();
+	end
+	
+endtask
+
+
+
+`endif		// instr_exec_tasks_svinc

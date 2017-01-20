@@ -1,0 +1,112 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`include "src/alu_defines.svinc"
+
+
+package pkg_alu;
+	
+	typedef enum bit [`addsub_op_msb_pos:0]
+	{
+		// Copy the { proc_flags_in, a_in_hi, a_in_lo } inputs to the 
+		// { proc_flags_out, out_hi, out_lo } outputs
+		addsub_op_follow,
+		
+		// Addition operations
+		addsub_op_add,
+		addsub_op_adc,
+		addsub_op_addpb,
+		
+		// 16-bit Add that SigN-eEtends b_in_lo to a 16-bit signed value
+		// before performing the addition.
+		addsub_op_addpsnx,
+		
+		// Subtraction operations
+		addsub_op_sub,
+		addsub_op_sbc,
+		addsub_op_subpb
+		
+	} addsub_oper;
+	
+	// ALU operation enum values
+	typedef enum bit [`alu_op_msb_pos:0]
+	{
+		// Arithmetic operations
+		// Addition operations
+		alu_op_add,
+		alu_op_adc,
+		
+		alu_op_addpb,
+		
+		// 16-bit Add that SigN-eEtends b_in_lo to a 16-bit signed value
+		// before performing the addition.
+		alu_op_addpsnx,
+		
+		
+		// Subtraction operations
+		alu_op_sub,
+		alu_op_sbc,
+		alu_op_subpb,
+		
+		//// There is no need for this to exist because sub covers it
+		//alu_op_cmp,
+		
+		// Bitwise operations
+		
+		// Operations analogous to logic gates (none of these affect carry)
+		alu_op_and,
+		alu_op_orr,
+		alu_op_xor,
+		
+		// Complement operations
+		alu_op_inv,
+		alu_op_neg,
+		
+		
+		
+		// 16-bit Bitshifting operations that shift { a_in_hi, a_in_lo }
+		// by { b_in_hi, b_in_lo } bits
+		alu_op_lsl,
+		alu_op_lsr,
+		alu_op_asr,
+		
+		// 16-bit Bit rotation operations that rotate { a_in_hi, a_in_lo }
+		// by [{ b_in_hi, b_in_lo } % inout_width] bits
+		alu_op_rol,
+		alu_op_ror,
+		
+		
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, a_in_hi, a_in_lo } by one bit:
+		alu_op_rolc,
+		alu_op_rorc
+		
+		
+	} alu_oper;
+	
+	typedef enum bit [1:0]
+	{
+		// 16-bit operation with no carry in
+		alu_op_cat_16_no_ci,
+		
+		// 16-bit operation with carry in
+		alu_op_cat_16_ci
+	} alu_oper_cat;
+	
+	
+endpackage

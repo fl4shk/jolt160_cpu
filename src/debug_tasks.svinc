@@ -1,0 +1,93 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`ifndef debug_tasks_svinc
+`define debug_tasks_svinc
+
+
+task debug_disp_init_instr;
+	case (init_instr_grp)
+		pkg_instr_dec::instr_grp_1:
+		begin
+			debug_disp_init_instr_from_grp_1();
+		end
+		
+		pkg_instr_dec::instr_grp_2:
+		begin
+			debug_disp_init_instr_from_grp_2();
+		end
+		
+		pkg_instr_dec::instr_grp_3:
+		begin
+			debug_disp_init_instr_from_grp_3();
+		end
+		
+		pkg_instr_dec::instr_grp_4:
+		begin
+			debug_disp_init_instr_from_grp_4();
+		end
+		
+		pkg_instr_dec::instr_grp_5:
+		begin
+			debug_disp_init_instr_from_grp_5();
+		end
+	endcase
+endtask
+
+
+task debug_disp_final_instr;
+	case (final_instr_grp)
+		pkg_instr_dec::instr_grp_1:
+		begin
+			debug_disp_final_instr_from_grp_1();
+		end
+		
+		pkg_instr_dec::instr_grp_2:
+		begin
+			debug_disp_final_instr_from_grp_2();
+		end
+		
+		pkg_instr_dec::instr_grp_3:
+		begin
+			debug_disp_final_instr_from_grp_3();
+		end
+		
+		pkg_instr_dec::instr_grp_4:
+		begin
+			debug_disp_final_instr_from_grp_4();
+		end
+		
+		pkg_instr_dec::instr_grp_5:
+		begin
+			debug_disp_final_instr_from_grp_5();
+		end
+	endcase
+endtask
+
+
+task debug_disp_regs_and_proc_flags;
+	$display
+		( "%h %h %h %h\t\t%h %h %h %h\t\t%h %h %h %h\t\t%h %h %h %h\t\t%b", 
+		cpu_regs[0], cpu_regs[1], cpu_regs[2], cpu_regs[3],
+		cpu_regs[4], cpu_regs[5], cpu_regs[6], cpu_regs[7],
+		cpu_regs[8], cpu_regs[9], cpu_regs[10], cpu_regs[11],
+		cpu_regs[12], cpu_regs[13], cpu_regs[14], cpu_regs[15],
+		true_proc_flags );
+endtask
+
+`endif		// debug_tasks_svinc

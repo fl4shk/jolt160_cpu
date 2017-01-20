@@ -1,0 +1,534 @@
+// This file is part of Jolt160 CPU.
+// 
+// Copyright 2016-2017 by Andrew Clark (FL4SHK).
+// 
+// Jolt160 CPU is free software: you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or (at
+// your option) any later version.
+// 
+// Jolt160 CPU is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with Jolt160 CPU.  If not, see <http://www.gnu.org/licenses/>.
+
+
+`include "src/instr_decoder_defines.svinc"
+`include "src/cpu_extras_defines.svinc"
+
+
+package pkg_instr_dec;
+	
+	
+	
+	typedef enum bit [`instr_grp_msb_pos:0]
+	{
+		// Non-branching instructions with 8-bit immediate values
+		instr_grp_1,
+		
+		// The instruction group with the most opcodes
+		instr_grp_2,
+		
+		// Instructions with one register and two register pairs
+		instr_grp_3,
+		
+		// Branching instructions
+		instr_grp_4,
+		
+		// Instructions encoded with four bytes instead of two so that
+		// there can be 16-bit immediate values
+		instr_grp_5,
+		
+		
+		// The instruction is of an unknown group
+		instr_grp_unknown
+		
+	} instr_group;
+	
+	
+	// Instruction group 1 has 3 opcode bits
+	// Encoding:  0ooo aaaa iiii iiii
+	typedef enum bit [`instr_g1_op_msb_pos:0]
+	{
+		// Arithmetic instructions:
+		// (ADD 8-bit Immediate value to reg Pair rAp)
+		instr_g1_op_addi,
+		// (SuBtract 8-bit Immediate value from reg Pair rAp)
+		instr_g1_op_subi,
+		// (CoMPare reg pair rAp to 8-bit Immediate value)
+		instr_g1_op_cmpi,
+		
+		// Bitshifting instructions with two operands (rAp and 8-bit
+		// Immediate value):
+		instr_g1_op_lsli,
+		instr_g1_op_lsri,
+		instr_g1_op_asri,
+		  
+		// Copy instructions:
+		
+		// (CoPY Byte Immediate to register rA)
+		instr_g1_op_cpybi
+	} instr_grp_1_oper;
+	
+	
+	
+	// Instruction group 2 has 6 opcode bits
+	// Encoding:  10oo oooo aaaa bbbb
+	typedef enum bit [`instr_g2_op_msb_pos:0]
+	{
+		// -- rA, rB --
+		
+		// Copy instructions:
+		// (CoPY from reg rB to reg rA)
+		instr_g2_op_cpyb,
+		
+		
+		// -- rAp --
+		// Complement instructions with one reg pair operand (rB ignored):
+		// (one's complement of rAp)
+		instr_g2_op_inv,
+		// (two's complement of rAp)
+		instr_g2_op_neg,
+		
+		// Bit rotating instructions that use carry as bit 16 for a 17-bit
+		// rotate of { carry, rAp } by one bit:
+		instr_g2_op_rolc,
+		instr_g2_op_rorc,
+		
+		// Call instruction (Description:  sets the link register to the
+		// return address, then sets the program counter to the address
+		// contained in the reg pair rAp):
+		// (CALL subroutine at address in reg pair rAp)
+		instr_g2_op_call,
+		
+		
+		// PC Copy Instructions:
+		// (CoPY FRom PC to reg pair rAp (this can be used for pc-relative
+		// loads and stores))
+		instr_g2_op_cpyfrpc,
+		
+		// (Copy rAp to the pc)
+		instr_g2_op_jump,
+		
+		// Extra Interrupt Instructions:
+		// (Swap the Interrupt Return Address and rAp)
+		instr_g2_op_swpira,
+		// (CoPY the Interrupt Return Address to rAp)
+		instr_g2_op_cpyira,
+		
+		// Flags Instructions:
+		// (Clear reg rAp, then CoPY FRom Flags to reg rAp)
+		instr_g2_op_cpyfrf,
+		// (CoPY TO Flags from reg rAp)
+		instr_g2_op_cpytof,
+		
+		// (Add 1 to the reg pair rAp, then LoaD a byte, from the updated
+		// address in rAp, containing processor Flags (other bits cleared)
+		// into the processor flags)
+		instr_g2_op_ldfab,
+		
+		// (STore a byte containing the current processor flags (other bits
+		// cleared) to memory at address contained in reg pair rAp, then
+		// Subtract 1 from the reg pair rAp)
+		instr_g2_op_stfsa,
+		
+		
+		
+		// -- rA, rBp --
+		// 8-bit Load/store instructions:
+		// (LoaD contents into Register rA from memory at address in rBp)
+		instr_g2_op_ldr,
+		// (STore Register rA contents to memory at address in rBp)
+		instr_g2_op_str,
+		
+		
+		
+		// -- rAp, rBp --
+		
+		// Arithmetic instructions:
+		instr_g2_op_add,
+		instr_g2_op_adc,
+		instr_g2_op_sub,
+		instr_g2_op_sbc,
+		instr_g2_op_cmp,
+		// (Unsigned MULtiplies rAp and rBp and stores 32-bit result in
+		// r0p:r2p)
+		instr_g2_op_umull,
+		// (Signed MULtiplies rAp and rBp and stores 32-bit result in
+		// r0p:r2p)
+		instr_g2_op_smull,
+		
+		// Bitwise instructions with two reg pair operands:
+		instr_g2_op_and,
+		// (same thing as "and" but only affects flags)
+		instr_g2_op_tst,
+		instr_g2_op_orr,
+		instr_g2_op_xor,
+		
+		// Bitshifting (and rotating) instructions that do a 16-bit shift
+		// or rotate on the reg pair rAp, using rBp as the number of bits
+		// to shift by:
+		instr_g2_op_lsl,
+		instr_g2_op_lsr,
+		instr_g2_op_asr,
+		instr_g2_op_rol,
+		instr_g2_op_ror,
+		
+		// (CoPY from reg pair rBp to reg Pair rAp)
+		instr_g2_op_cpy,
+		
+		// 16-bit Load/store instructions:
+		// (LoaD contents into reg Pair rAp from memory at address in rBp)
+		instr_g2_op_ldp,
+		// (STore reg Pair rAp contents to memory at address in rBp)
+		instr_g2_op_stp,
+		
+		// 16-bit Push/pop style instructions:
+		// (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
+		// from memory at address contained in reg pair rBp)
+		instr_g2_op_ldpab,
+		
+		// (STore reg Pair rAp to memory at address contained in reg pair
+		// rBp, then Subtract 1 from the reg pair rBp)
+		instr_g2_op_stpsa,
+		
+		
+		
+		
+		// -- no args --
+		// Interrupt instructions (these ignore BOTH rA and rB):
+		
+		// (ENable Interrupts)
+		instr_g2_op_eni,
+		// (DIsable Interrupts)
+		instr_g2_op_dii,
+		// (Set the PC to interrupt RETurn address and enable Interrupts)
+		instr_g2_op_reti,
+		
+		// (Set the PC to the Interrupt Return Address, but DON'T enable
+		// interrupts)
+		instr_g2_op_jumpira
+		
+	} instr_grp_2_oper;
+	
+	// Instruction group 3 has 2 opcode bits
+	// Encoding:  1100 ooaa aabb bccc
+	typedef enum bit [`instr_g3_op_msb_pos:0]
+	{
+		// Indexed Load/store instructions:
+		
+		// Load 8-bit value from memory at address [rBp + rCp] into rA
+		instr_g3_op_ldrx,
+		
+		// Store rA to memory at address [rBp + rCp]
+		instr_g3_op_strx,
+		
+		
+		// (Load 16-bit value from memory at address [rBp + rCp] into rAp)
+		instr_g3_op_ldpx,
+		// (Store rAp to memory at address [rBp + rCp])
+		instr_g3_op_stpx 
+		
+	} instr_grp_3_oper;
+	
+	
+	// Instruction group 4 has 4 opcode bits
+	// Encoding:  1101 oooo iiii iiii
+	typedef enum bit [`instr_g4_op_msb_pos:0]
+	{
+		// Branching instructions (note that iiii iiii is a SIGNED 8-bit
+		// integer):
+		
+		// (branch always)
+		instr_g4_op_bra,
+		
+		// (branch never, a form of NOP)
+		instr_g4_op_bnv,
+		
+		// (branch when Z == 0)
+		instr_g4_op_bne,
+		
+		// (branch when Z == 1)
+		instr_g4_op_beq,
+		
+		// (branch when C == 0 [unsigned less than])
+		instr_g4_op_bcc,
+		
+		// (branch when C == 1 [unsigned greater than or equal])
+		instr_g4_op_bcs,
+		
+		// (branch when C == 0 or Z == 1 [unsigned less than or equal])
+		instr_g4_op_bls,
+		
+		// (branch when C == 1 and Z == 0 [unsigned greater than])
+		instr_g4_op_bhi,
+		
+		// (branch when N == 0)
+		instr_g4_op_bpl,
+		
+		// (branch when N == 1)
+		instr_g4_op_bmi,
+		
+		// (branch when V == 0)
+		instr_g4_op_bvc,
+		
+		// (branch when V == 1)
+		instr_g4_op_bvs,
+		
+		// (branch when N == V [signed greater than or equal])
+		instr_g4_op_bge,
+		
+		// (branch when N != V [signed less than])
+		instr_g4_op_blt,
+		
+		// (branch when ( N == V and Z == 0 ) [signed greater than])
+		instr_g4_op_bgt,
+		
+		// (branch when ( N != V or Z == 1 ) [signed less than or equal])
+		instr_g4_op_ble
+		
+	} instr_grp_4_oper;
+	
+	
+	// Instruction group 5 has 3 opcode bits
+	// Encoding:  1110 00oo oaaa abbb   iiii iiii jjjj jjjj
+	typedef enum bit [`instr_g5_op_msb_pos:0]
+	{
+		// Extended copy instructions:
+		
+		// (COPY Pair Immediate, which sets the a register pair rAp to a
+		// 16-bit value in one instruction, but in twice the number of
+		// cycles due to using more than two bytes [can be used a as a jump
+		// immediate by copying a 16-bit immediate value to the pc] [this
+		// instruction ONLY has an advantage over using two successive cpyi
+		// instructions when used to copy a 16-bit immediate value to the
+		// pc])
+		instr_g5_op_cpyi,
+		
+		// (Sets the PC to a 16-bit immediate value)
+		instr_g5_op_jumpi,
+		
+		// Call instructions
+		
+		// (CALL Immediate, which sets the link register to the return
+		// address, then sets the program counter to the destination
+		// address)
+		instr_g5_op_calli,
+		
+		// Indexed Load/store instructions:
+		
+		// (Load 8-bit value from memory at address [rBp + 16-bit Immediate
+		// value] into rA)
+		instr_g5_op_ldrxi,
+		
+		// (Store rA to memory at address [rBp + 16-bit Immediate value])
+		instr_g5_op_strxi,
+		
+		
+		// (Load 16-bit value from memory at address [rBp + 16-bit Immediate
+		// value] into rAp)
+		instr_g5_op_ldpxi,
+		// (Store rAp to memory at address [rBp + 16-bit Immediate value])
+		instr_g5_op_stpxi
+	} instr_grp_5_oper;
+	
+	
+	
+	function get_instr_is_32_bit;
+		input [`instr_grp_msb_pos:0] test_instr_grp;
+		get_instr_is_32_bit = ( test_instr_grp == instr_grp_5 );
+	endfunction
+	
+	
+	// Functions for checking whether a reg index is actually a reg pair
+	// index
+	function ig1_get_ra_index_is_for_pair;
+		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+		
+		ig1_get_ra_index_is_for_pair 
+			= ( test_ig1_opcode != instr_g1_op_cpybi );
+	endfunction
+	
+	
+	function ig2_get_ra_index_is_for_pair;
+		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+		ig2_get_ra_index_is_for_pair
+			= ( ( test_ig2_opcode != instr_g2_op_cpyb )
+			&& ( test_ig2_opcode != instr_g2_op_ldr )
+			&& ( test_ig2_opcode != instr_g2_op_str ) );
+	endfunction
+	
+	function ig2_get_rb_index_is_for_pair;
+		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+		ig2_get_rb_index_is_for_pair
+			= ( test_ig2_opcode != instr_g2_op_cpyb );
+	endfunction
+	
+	function ig3_get_ra_index_is_for_pair;
+		input [`instr_g3_op_msb_pos:0] test_ig3_opcode;
+		ig3_get_ra_index_is_for_pair
+			= ( ( test_ig3_opcode == instr_g3_op_ldpx )
+			|| ( test_ig3_opcode == instr_g3_op_stpx ) );
+	endfunction
+	
+	function ig5_get_ra_index_is_for_pair;
+		input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
+		ig5_get_ra_index_is_for_pair
+			= ( ( test_ig5_opcode == instr_g5_op_cpyi )
+			|| ( test_ig5_opcode == instr_g5_op_ldpxi )
+			|| ( test_ig5_opcode == instr_g5_op_stpxi ) );
+	endfunction
+	
+	
+	
+	// Functions for checking whether an instruction can possibly change
+	// the pc (though it might NOT change, in which case we need to update
+	// the pc normally)
+	
+	
+	// The call instruction ALWAYS changes the pc
+	function ig2_get_instr_definitely_changes_pc;
+		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+		
+		ig2_get_instr_definitely_changes_pc
+			= ( ( test_ig2_opcode == instr_g2_op_call )
+			|| ( test_ig2_opcode == instr_g2_op_jump )
+			|| ( test_ig2_opcode == instr_g2_op_reti )
+			|| ( test_ig2_opcode == instr_g2_op_jumpira ) );
+	endfunction
+	
+	
+	// The calli instruction ALWAYS changes the pc
+	function ig5_get_instr_definitely_changes_pc;
+		input [`instr_g2_op_msb_pos:0] test_ig5_opcode;
+		
+		ig5_get_instr_definitely_changes_pc
+			= ( test_ig5_opcode == instr_g5_op_jumpi 
+			|| ( test_ig5_opcode == instr_g5_op_calli ) );
+		
+	endfunction
+	
+	
+	// Functions for checking whether an instruction is a load or store
+	// instruction
+	function ig1_get_instr_is_ldst;
+		input [`instr_g1_op_msb_pos:0] test_ig1_opcode;
+		ig1_get_instr_is_ldst = 0;
+	endfunction
+	
+	function ig2_get_instr_is_ldst;
+		input [`instr_g2_op_msb_pos:0] test_ig2_opcode;
+		ig2_get_instr_is_ldst = ( ( test_ig2_opcode == instr_g2_op_ldr )
+			|| ( test_ig2_opcode == instr_g2_op_str )
+			|| ( test_ig2_opcode == instr_g2_op_ldp )
+			|| ( test_ig2_opcode == instr_g2_op_stp )
+			|| ( test_ig2_opcode == instr_g2_op_ldpab )
+			|| ( test_ig2_opcode == instr_g2_op_stpsa )
+			|| ( test_ig2_opcode == instr_g2_op_ldfab )
+			|| ( test_ig2_opcode == instr_g2_op_stfsa ) );
+	endfunction
+	
+	function ig3_get_instr_is_ldst;
+		input [`instr_g3_op_msb_pos:0] test_ig3_opcode;
+		ig3_get_instr_is_ldst = ( ( test_ig3_opcode == instr_g3_op_ldrx )
+			|| ( test_ig3_opcode == instr_g3_op_strx )
+			|| ( test_ig3_opcode == instr_g3_op_ldpx )
+			|| ( test_ig3_opcode == instr_g3_op_stpx ) );
+	endfunction
+	
+	function ig4_get_instr_is_ldst;
+		input [`instr_g4_op_msb_pos:0] test_ig4_opcode;
+		ig4_get_instr_is_ldst = 0;
+	endfunction
+	
+	function ig5_get_instr_is_ldst;
+		input [`instr_g5_op_msb_pos:0] test_ig5_opcode;
+		ig5_get_instr_is_ldst = ( ( test_ig5_opcode == instr_g5_op_ldrxi )
+			|| ( test_ig5_opcode == instr_g5_op_strxi )
+			|| ( test_ig5_opcode == instr_g5_op_ldpxi )
+			|| ( test_ig5_opcode == instr_g5_op_stpxi ) );
+	endfunction
+	
+	// Functions for checking whether a branch will be taken
+	function ig4_get_branch_was_taken;
+		input [`instr_g4_op_msb_pos:0] test_ig4_opcode;
+		input [`proc_flags_msb_pos:0] test_proc_flags;
+		
+		ig4_get_branch_was_taken
+			// (branch always)
+			= ( ( test_ig4_opcode == instr_g4_op_bra )
+			
+			// (branch when Z == 0)
+			|| ( test_ig4_opcode == instr_g4_op_bne
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] )
+			
+			// (branch when Z == 1)
+			|| ( test_ig4_opcode == instr_g4_op_beq
+			&& test_proc_flags[pkg_pflags::pf_slot_z] )
+			
+			// (branch when C == 0 [unsigned less than])
+			|| ( test_ig4_opcode == instr_g4_op_bcc
+			&& !test_proc_flags[pkg_pflags::pf_slot_c] )
+			
+			// (branch when C == 1 [unsigned greater than or equal])
+			|| ( test_ig4_opcode == instr_g4_op_bcs
+			&& test_proc_flags[pkg_pflags::pf_slot_c] )
+			
+			// (branch when C == 0 or Z == 1 [unsigned less than or equal])
+			|| ( test_ig4_opcode == instr_g4_op_bls
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_c]
+			|| test_proc_flags[pkg_pflags::pf_slot_z] ) )
+			
+			// (branch when C == 1 and Z == 0 [unsigned greater than])
+			|| ( test_ig4_opcode == instr_g4_op_bhi 
+			&& ( test_proc_flags[pkg_pflags::pf_slot_c]
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] ) ) 
+			
+			
+			// (branch when N == 0)
+			|| ( test_ig4_opcode == instr_g4_op_bpl
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_n] ) )
+			
+			// (branch when N == 1)
+			|| ( test_ig4_opcode == instr_g4_op_bmi
+			&& ( test_proc_flags[pkg_pflags::pf_slot_n] ) )
+			
+			// (branch when V == 0)
+			|| ( test_ig4_opcode == instr_g4_op_bvc
+			&& ( !test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when V == 1)
+			|| ( test_ig4_opcode == instr_g4_op_bvs
+			&& ( test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when N == V [signed greater than or equal])
+			|| ( test_ig4_opcode == instr_g4_op_bge
+			&& ( test_proc_flags[pkg_pflags::pf_slot_n]
+			== test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when N != V [signed less than])
+			|| ( test_ig4_opcode == instr_g4_op_blt
+			&& ( test_proc_flags[pkg_pflags::pf_slot_n]
+			!= test_proc_flags[pkg_pflags::pf_slot_v] ) )
+			
+			// (branch when ( N == V and Z == 0 ) [signed greater than])
+			|| ( test_ig4_opcode == instr_g4_op_bgt
+			&& ( ( test_proc_flags[pkg_pflags::pf_slot_n]
+			== test_proc_flags[pkg_pflags::pf_slot_v] )
+			&& !test_proc_flags[pkg_pflags::pf_slot_z] ) )
+			
+			// (branch when ( N != V or Z == 1 ) [signed less than or
+			// equal])
+			|| ( test_ig4_opcode == instr_g4_op_ble
+			&& ( ( test_proc_flags[pkg_pflags::pf_slot_n]
+			!= test_proc_flags[pkg_pflags::pf_slot_v] )
+			|| test_proc_flags[pkg_pflags::pf_slot_z] ) ) );
+	endfunction
+	
+	
+endpackage
+
+
