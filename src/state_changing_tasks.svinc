@@ -202,10 +202,10 @@ task prep_load_instr_hi_generic;
 				prep_load_16_with_addr(`get_cpu_rp_pc);
 			end
 			
-			// If the instruction is a call instruction
+			// If the instruction is a jump or call instruction
 			else
 			begin
-				$display("Instead, it was a call instruction");
+				$display("Instead, it was a jump or call instruction");
 				prep_load_16_no_addr();
 			end
 		end

@@ -187,12 +187,12 @@ package pkg_instr_dec;
 		instr_g2_op_stp,
 		
 		// 16-bit Push/pop style instructions:
-		// (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
+		// (Add 2 the reg pair rBp, then LoaD contents into reg pair rAp
 		// from memory at address contained in reg pair rBp)
 		instr_g2_op_ldpab,
 		
 		// (STore reg Pair rAp to memory at address contained in reg pair
-		// rBp, then Subtract 1 from the reg pair rBp)
+		// rBp, then Subtract 2 from the reg pair rBp)
 		instr_g2_op_stpsa,
 		
 		

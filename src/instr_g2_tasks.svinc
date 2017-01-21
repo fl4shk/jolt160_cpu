@@ -1627,7 +1627,7 @@ task prep_alu_instr_grp_2_generic;
 		//end
 		
 		// 16-bit Push/pop style instructions:
-		// (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
+		// (Add 2 the reg pair rBp, then LoaD contents into reg pair rAp
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldpab:
 		begin
@@ -1636,7 +1636,7 @@ task prep_alu_instr_grp_2_generic;
 		end
 		
 		// (STore reg Pair rAp to memory at address contained in reg pair
-		// rBp, then Subtract 1 from the reg pair rBp)
+		// rBp, then Subtract 2 from the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stpsa:
 		begin
 			do_alu_op_sub_no_flags( `make_reg_ind_from_pi(rb_index), 0, 

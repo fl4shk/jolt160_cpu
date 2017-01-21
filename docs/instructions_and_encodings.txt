@@ -140,11 +140,11 @@ Group 2 (The instruction group with the most opcodes):
       stp (STore reg Pair rAp contents to memory at address in rBp)
     
     16-bit Push/pop style instructions:
-      ldpab (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
+      ldpab (Add 2 the reg pair rBp, then LoaD contents into reg pair rAp
       from memory at address contained in reg pair rBp)
     
       stpsa (STore reg Pair rAp to memory at address contained in reg pair
-      rBp, then Subtract 1 from the reg pair rBp)
+      rBp, then Subtract 2 from the reg pair rBp)
     
     
     
