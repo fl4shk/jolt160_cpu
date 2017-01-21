@@ -245,8 +245,11 @@ task prep_alu_instr_grp_1_generic;
 	if ( ( opcode >= pkg_instr_dec::instr_g1_op_addi )
 		&& ( opcode <= pkg_instr_dec::instr_g1_op_asri ) )
 	begin
-		set_alu_inputs_a16_b16( ra_index, `cpu_imm_value_8_width'h0,
-			imm_value_8, 1 );
+		if ( opcode != pkg_instr_dec::instr_g1_op_cmpi )
+		begin
+			set_alu_inputs_a16_b16( ra_index, `cpu_imm_value_8_width'h0,
+				imm_value_8, 1 );
+		end
 		case (opcode)
 			// Arithmetic instructions:
 			// (ADD 8-bit Immediate value to reg Pair rAp)
@@ -266,9 +269,8 @@ task prep_alu_instr_grp_1_generic;
 			// (CoMPare reg pair rAp to 8-bit Immediate value)
 			pkg_instr_dec::instr_g1_op_cmpi:
 			begin
-				//do_alu_op_cmp( ra_index, `cpu_imm_value_8_width'h0, 
-				//	imm_value_8 );
-				finish_do_alu_op_cmp();
+				do_alu_op_cmp( ra_index, `cpu_imm_value_8_width'h0, 
+					imm_value_8 );
 			end
 			
 			// Bitshifting instructions with two operands (rAp and 8-bit
