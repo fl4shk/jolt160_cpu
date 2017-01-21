@@ -1501,28 +1501,33 @@ task prep_alu_instr_grp_2_generic;
 		// Arithmetic instructions:
 		pkg_instr_dec::instr_g2_op_add:
 		begin
-			do_alu_op_add( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_add( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_adc:
 		begin
-			do_alu_op_adc( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_adc( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_sub:
 		begin
-			do_alu_op_sub( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_sub( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_sbc:
 		begin
-			do_alu_op_sbc( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_sbc( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_cmp:
 		begin
-			do_alu_op_cmp( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_cmp( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		
 		// (Unsigned MULtiplies rAp and rBp and stores 32-bit result in
@@ -1544,24 +1549,28 @@ task prep_alu_instr_grp_2_generic;
 		// Bitwise instructions with two reg pair operands:
 		pkg_instr_dec::instr_g2_op_and:
 		begin
-			do_alu_op_and( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_and( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		// (same thing as "and" but only affects flags)
 		pkg_instr_dec::instr_g2_op_tst:
 		begin
-			do_alu_op_and_no_change_rap( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_and_no_change_rap( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_orr:
 		begin
-			do_alu_op_orr( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_orr( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_xor:
 		begin
-			do_alu_op_xor( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_xor( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		
 		// Bitshifting (and rotating) instructions that do a 16-bit shift
@@ -1569,28 +1578,33 @@ task prep_alu_instr_grp_2_generic;
 		// to shift by:
 		pkg_instr_dec::instr_g2_op_lsl:
 		begin
-			do_alu_op_lsl( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_lsl( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_lsr:
 		begin
-			do_alu_op_lsr( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_lsr( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_asr:
 		begin
-			do_alu_op_asr( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_asr( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_rol:
 		begin
-			do_alu_op_rol( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_rol( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		pkg_instr_dec::instr_g2_op_ror:
 		begin
-			do_alu_op_ror( ra_index, cpu_regs[rb_index],
-				cpu_regs[ rb_index + 1 ] );
+			do_alu_op_ror( ra_index, 
+				cpu_regs[`make_reg_ind_from_pi(rb_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
 		end
 		
 		//// (CoPY from reg pair rBp to reg Pair rAp)
@@ -1616,14 +1630,16 @@ task prep_alu_instr_grp_2_generic;
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldpab:
 		begin
-			do_alu_op_add_no_flags( rb_index, 0, 2 );
+			do_alu_op_add_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
+				2 );
 		end
 		
 		// (STore reg Pair rAp to memory at address contained in reg pair
 		// rBp, then Subtract 1 from the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stpsa:
 		begin
-			do_alu_op_sub_no_flags( rb_index, 0, 2 );
+			do_alu_op_sub_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
+				2 );
 		end
 		
 		
