@@ -1535,15 +1535,16 @@ task prep_alu_instr_grp_2_generic;
 		pkg_instr_dec::instr_g2_op_umull:
 		begin
 			{ `make_reg_pair_w_pi(0), `make_reg_pair_w_pi(1) }
-				<= `get_final_ig2_rpair_a * `get_final_ig2_rpair_b;
+				<= `make_reg_pair_w_pi(ra_index) 
+				* `make_reg_pair_w_pi(rb_index);
 		end
 		// (Signed MULtiplies rAp and rBp and stores 32-bit result in
 		// r0p:r2p)
 		pkg_instr_dec::instr_g2_op_smull:
 		begin
 			{ `make_reg_pair_w_pi(0), `make_reg_pair_w_pi(1) }
-				<= $signed(`get_final_ig2_rpair_a)
-				* $signed(`get_final_ig2_rpair_b);
+				<= $signed(`make_reg_pair_w_pi(ra_index))
+				* $signed(`make_reg_pair_w_pi(rb_index));
 		end
 		
 		// Bitwise instructions with two reg pair operands:
@@ -2246,13 +2247,13 @@ task start_exec_instr_from_grp_2;
 		// r0p:r2p)
 		pkg_instr_dec::instr_g2_op_umull:
 		begin
-			finish_alu_op_with_dest_rpair();
+			//finish_alu_op_with_dest_rpair();
 		end
 		// (Signed MULtiplies rAp and rBp and stores 32-bit result in
 		// r0p:r2p)
 		pkg_instr_dec::instr_g2_op_smull:
 		begin
-			finish_alu_op_with_dest_rpair();
+			//finish_alu_op_with_dest_rpair();
 		end
 		
 		// Bitwise instructions with two reg pair operands:
