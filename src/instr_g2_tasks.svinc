@@ -1132,8 +1132,7 @@ task prep_alu_instr_grp_2_generic;
 	else if ( ( opcode >= pkg_instr_dec::instr_g2_op_ldpab )
 		&& ( opcode <= pkg_instr_dec::instr_g2_op_stpsa ) )
 	begin
-		set_alu_inputs_a16_b16( `make_reg_ind_from_pi(rb_index), 0, 2, 
-			1 );
+		set_alu_inputs_a16_b16( rb_index, 0, 2, 1 );
 	end
 	
 	
@@ -1321,8 +1320,10 @@ task prep_alu_instr_grp_2_generic;
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldpab:
 		begin
-			//do_alu_op_add_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
-			//	2 );
+			//do_alu_op_add_no_flags( rb_index, 0, 2 );
+			//$display( "ldpab start:  %d, %d, %h", rb_index, 
+			//	`make_reg_ind_from_pi(rb_index),
+			//	`make_reg_pair_w_pi(rb_index) );
 			finish_do_alu_op_add_no_flags();
 		end
 		
@@ -1330,8 +1331,10 @@ task prep_alu_instr_grp_2_generic;
 		// rBp, then Subtract 2 from the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stpsa:
 		begin
-			//do_alu_op_sub_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
-			//	2 );
+			//do_alu_op_sub_no_flags( rb_index, 0, 2 );
+			//$display( "stpsa start:  %d, %d, %h", rb_index, 
+			//	`make_reg_ind_from_pi(rb_index),
+			//	`make_reg_pair_w_pi(rb_index) );
 			finish_do_alu_op_sub_no_flags();
 		end
 		
@@ -1806,6 +1809,8 @@ task start_exec_instr_from_grp_2;
 	begin
 		// Load from memory at address contained in new reg pair rBp
 		prep_load_16_with_addr(`get_alu_out_16);
+		//$display( "ldpab finish:  %d, %d, %h", final_ig2_ra_index,
+		//	final_ig2_rb_index, `get_final_ig2_rpair_b );
 		finish_alu_op_with_dest_rpair();
 		//did_prep_ldst_instr <= 0;
 		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
@@ -1818,6 +1823,8 @@ task start_exec_instr_from_grp_2;
 		// Store to memory at address contained in old reg pair rBp
 		prep_store_16( `get_final_ig2_rpair_a, 
 			`get_final_ig2_rpair_b );
+		//$display( "stpsa finish:  %d, %d, %h", final_ig2_ra_index,
+		//	final_ig2_rb_index, `get_final_ig2_rpair_b );
 		finish_alu_op_with_dest_rpair();
 		//did_prep_ldst_instr <= 0;
 		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;

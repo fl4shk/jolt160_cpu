@@ -80,6 +80,8 @@ task finish_alu_op_with_dest_rpair;
 	if (alu_dest_rpair_was_modded)
 	begin
 		//`make_reg_pair_w_pi(alu_dest_rpair_index) <= `get_alu_out_16;
+		$display( "finish_alu_op_with_dest_rpair:  %d, %h",
+			alu_dest_rpair_index, `get_alu_out_16 );
 		set_reg_pair_with_pi( alu_dest_rpair_index, `get_alu_out_16 );
 	end
 	if (alu_modded_proc_flags)
