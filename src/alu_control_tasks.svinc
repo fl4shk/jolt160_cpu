@@ -251,16 +251,13 @@ task do_alu_op_and;
 	finish_do_alu_op_and();
 endtask
 
-task finish_do_alu_op_and_no_change_rap;
-	set_more_alu_config( pkg_alu::alu_op_and, 1 );
-endtask
 task do_alu_op_and_no_change_rap;
 	input [`cpu_reg_arr_msb_pos:0] some_rap_index;
 	input [`cpu_imm_value_8_msb_pos:0] some_b_in_hi, some_b_in_lo;
 	
 	set_alu_inputs_a16_b16( some_rap_index, some_b_in_hi, some_b_in_lo,
 		0 );
-	finish_do_alu_op_and_no_change_rap();
+	set_more_alu_config( pkg_alu::alu_op_and, 1 );
 endtask
 
 task finish_do_alu_op_orr;
@@ -288,17 +285,24 @@ task do_alu_op_xor;
 endtask
 
 // Complement operations
+task finish_do_alu_op_inv;
+	set_more_alu_config( pkg_alu::alu_op_inv, 1 );
+endtask
 task do_alu_op_inv;
 	input [`cpu_reg_arr_msb_pos:0] some_rap_index;
 	
 	set_alu_dest_reg_pair( some_rap_index, 1 );
-	set_more_alu_config( pkg_alu::alu_op_inv, 1 );
+	finish_do_alu_op_inv();
+endtask
+
+task finish_do_alu_op_neg;
+	set_more_alu_config( pkg_alu::alu_op_neg, 1 );
 endtask
 task do_alu_op_neg;
 	input [`cpu_reg_arr_msb_pos:0] some_rap_index;
 	
 	set_alu_dest_reg_pair( some_rap_index, 1 );
-	set_more_alu_config( pkg_alu::alu_op_neg, 1 );
+	finish_do_alu_op_neg;
 endtask
 
 
@@ -370,17 +374,24 @@ endtask
 
 // Bit rotating instructions that use carry as bit 16 for a 17-bit
 // rotate of { carry, a_in_hi, a_in_lo } by one bit:
+task finish_do_alu_op_rolc;
+	set_more_alu_config( pkg_alu::alu_op_rolc, 1 );
+endtask
 task do_alu_op_rolc;
 	input [`cpu_reg_arr_msb_pos:0] some_rap_index;
 	
 	set_alu_dest_reg_pair( some_rap_index, 1 );
-	set_more_alu_config( pkg_alu::alu_op_rolc, 1 );
+	finish_do_alu_op_rolc();
+endtask
+
+task finish_do_alu_op_rorc;
+	set_more_alu_config( pkg_alu::alu_op_rorc, 1 );
 endtask
 task do_alu_op_rorc;
 	input [`cpu_reg_arr_msb_pos:0] some_rap_index;
 	
 	set_alu_dest_reg_pair( some_rap_index, 1 );
-	set_more_alu_config( pkg_alu::alu_op_rorc, 1 );
+	finish_do_alu_op_rorc();
 endtask
 
 

@@ -1106,369 +1106,75 @@ task prep_alu_instr_grp_2_generic;
 	input ra_index_is_for_pair, rb_index_is_for_pair;
 	
 	
-	//case (opcode)
-	//	// -- rA, rB --
-	//	
-	//	// Arithmetic instructions:
-	//	pkg_instr_dec::instr_g2_op_add:
-	//	begin
-	//		do_alu_op_add( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_adc:
-	//	begin
-	//		do_alu_op_adc( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_sub:
-	//	begin
-	//		do_alu_op_sub( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_sbc:
-	//	begin
-	//		do_alu_op_sbc( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_cmp:
-	//	begin
-	//		do_alu_op_cmp( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	
-	//	// Bitwise instructions with two register operands:
-	//	pkg_instr_dec::instr_g2_op_and:
-	//	begin
-	//		do_alu_op_and( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_orr:
-	//	begin
-	//		do_alu_op_orr( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_xor:
-	//	begin
-	//		do_alu_op_xor( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	
-	//	//// Bitshifting (and rotating) instructions that use the value of 
-	//	//// rB as the number of bits to shift by:
-	//	//pkg_instr_dec::instr_g2_op_lsl:
-	//	//begin
-	//	//	do_alu_op_lsl( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	//pkg_instr_dec::instr_g2_op_lsr:
-	//	//begin
-	//	//	do_alu_op_lsr( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	//pkg_instr_dec::instr_g2_op_asr:
-	//	//begin
-	//	//	do_alu_op_asr( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	//pkg_instr_dec::instr_g2_op_rol:
-	//	//begin
-	//	//	do_alu_op_rol( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	//pkg_instr_dec::instr_g2_op_ror:
-	//	//begin
-	//	//	do_alu_op_ror( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	//
-	//	//// Bit rotating instructions that use carry as bit 8 for a 9-bit
-	//	//// rotate of { carry, rA } by one bit:
-	//	//pkg_instr_dec::instr_g2_op_rolc:
-	//	//begin
-	//	//	do_alu_op_rolc(ra_index);
-	//	//end
-	//	//pkg_instr_dec::instr_g2_op_rorc:
-	//	//begin
-	//	//	do_alu_op_rorc(ra_index);
-	//	//end
-	//	
-	//	// Copy instructions:
-	//	// (CoPY from reg rB to reg rA)
-	//	//instr_g2_op_cpy
-	//	
-	//	
-	//	
-	//	
-	//	// -- rA --
-	//	
-	//	// Complement instructions with one register operand (rB ignored):
-	//	// (one's complement of rA)
-	//	pkg_instr_dec::instr_g2_op_inv:
-	//	begin
-	//		do_alu_op_inv(ra_index);
-	//	end
-	//	// (two's complement of rA)
-	//	pkg_instr_dec::instr_g2_op_neg:
-	//	begin
-	//		do_alu_op_neg(ra_index);
-	//	end
-	//	//// (Clear reg rA, then CoPY FRom Flags to reg rA)
-	//	//instr_g2_op_cpyfrf
-	//	//// (CoPY TO Flags from reg rA)
-	//	//instr_g2_op_cpytof
-	//	
-	//	
-	//	
-	//	
-	//	// -- rAp --
-	//	
-	//	// Complement instructions with one register operand (rB ignored):
-	//	// (one's complement of rAp)
-	//	pkg_instr_dec::instr_g2_op_invp:
-	//	begin
-	//		do_alu_op_invp(ra_index);
-	//	end
-	//	
-	//	// (two's complement of rA)
-	//	pkg_instr_dec::instr_g2_op_negp:
-	//	begin
-	//		do_alu_op_negp(ra_index);
-	//	end
-	//	
-	//	// Bit rotating instructions that use carry as bit 16 for a 17-bit
-	//	// rotate of { carry, rAp } by one bit:
-	//	pkg_instr_dec::instr_g2_op_rolcp:
-	//	begin
-	//		do_alu_op_rolcp(ra_index);
-	//	end
-	//	pkg_instr_dec::instr_g2_op_rorcp:
-	//	begin
-	//		do_alu_op_rorcp(ra_index);
-	//	end
-	//	
-	//	//// Call instruction (Description:  sets the link register to the
-	//	//// return address, then sets the program counter to the address
-	//	//// contained in the reg pair rAp): (CALL subroutine at address in
-	//	//// reg pair rAp)
-	//	//instr_g2_op_call
-	//	//
-	//	//// Extra Interrupt Instructions
-	//	//// (Swap the Interrupt Return Address and rAp)
-	//	//instr_g2_op_swpira
-	//	//// (CoPY the Interrupt Return Address to rAp)
-	//	//instr_g2_op_cpypira
-	//	
-	//	
-	//	
-	//	
-	//	// -- rAp, rB --
-	//	
-	//	//// Arithmetic instructions:
-	//	//pkg_instr_dec::instr_g2_op_addpb:
-	//	//begin
-	//	//	do_alu_op_addpb( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	//pkg_instr_dec::instr_g2_op_subpb:
-	//	//begin
-	//	//	do_alu_op_subpb( ra_index, cpu_regs[rb_index] );
-	//	//end
-	//	
-	//	// Bitshifting (and rotating) instructions that do a 16-bit shift
-	//	// or rotate on the reg pair rAp, using rB as the number of bits to
-	//	// shift by:
-	//	pkg_instr_dec::instr_g2_op_lslp:
-	//	begin
-	//		do_alu_op_lslp( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_lsrp:
-	//	begin
-	//		do_alu_op_lsrp( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_asrp:
-	//	begin
-	//		do_alu_op_asrp( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_rolp:
-	//	begin
-	//		do_alu_op_rolp( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_rorp:
-	//	begin
-	//		do_alu_op_rorp( ra_index, cpu_regs[rb_index] );
-	//	end
-	//	
-	//	
-	//	
-	//	
-	//	// -- rA, rBp --
-	//	
-	//	//// 8-bit Load/store instructions: (LoaD contents into Register rA
-	//	//// from memory at address in rBp)
-	//	//instr_g2_op_ldr
-	//	//// (STore Register rA contents to memory at address in rBp)
-	//	//instr_g2_op_str
-	//	
-	//	// 8-bit Push/pop style instructions:
-	//	
-	//	// (Add 1 the reg pair rBp, then LoaD contents into Register rA
-	//	// from memory at address contained in reg pair rBp)
-	//	pkg_instr_dec::instr_g2_op_ldrab:
-	//	begin
-	//		do_alu_op_addp_no_flags( rb_index, 0, 1 );
-	//	end
-	//	// (STore reg rA to memory at address contained in reg pair rBp,
-	//	// then Subtract 1 from the reg pair rBp)
-	//	pkg_instr_dec::instr_g2_op_strsa:
-	//	begin
-	//		do_alu_op_subp_no_flags( rb_index, 0, 1 );
-	//	end
-	//	
-	//	
-	//	
-	//	
-	//	// -- rAp, rBp --
-	//	
-	//	// Arithmetic instructions:
-	//	pkg_instr_dec::instr_g2_op_addp:
-	//	begin
-	//		do_alu_op_addp( ra_index,
-	//			cpu_regs[`make_reg_ind_from_pi(rb_index)], 
-	//			cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_subp:
-	//	begin
-	//		do_alu_op_subp( ra_index,
-	//			cpu_regs[`make_reg_ind_from_pi(rb_index)], 
-	//			cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
-	//	end
-	//	pkg_instr_dec::instr_g2_op_cmpp:
-	//	begin
-	//		do_alu_op_cmpp( ra_index, 
-	//			cpu_regs[`make_reg_ind_from_pi(rb_index)], 
-	//			cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
-	//	end
-	//	
-	//	//// (CoPY from reg Pair rBp to reg Pair rAp)
-	//	//instr_g2_op_cpyp
-	//	//// Swap instructions: (SWap register Pair, also can be used as a
-	//	//// combined "call", "jump", and "return" instruction by swapping
-	//	//// some other register pair with the "pc" [r14p] register pair)
-	//	//instr_g2_op_swp
-	//	
-	//	
-	//	
-	//	
-	//	// -- rBp --
-	//	
-	//	// (Add 1 to the reg pair rBp, then LoaD a byte containing
-	//	// processor Flags (other bits cleared) into the processor flags)
-	//	pkg_instr_dec::instr_g2_op_ldfab:
-	//	begin
-	//		do_alu_op_addp_no_flags( rb_index, 0, 1 );
-	//	end
-	//	// (STore a byte containing the current processor flags (other bits
-	//	// cleared) to memory at address contained in reg pair rBp, then
-	//	// Add 1 the reg pair rBp)
-	//	pkg_instr_dec::instr_g2_op_stfsa:
-	//	begin
-	//		do_alu_op_subp_no_flags( rb_index, 0, 1 );
-	//	end
-	//	
-	//	
-	//	
-	//	
-	//	// -- no args --
-	//	
-	//	//// Interrupt instructions (these ignore BOTH rA and rB):
-	//	//// (ENable Interrupts)
-	//	//instr_g2_op_eni
-	//	//// (DIsable Interrupts)
-	//	//instr_g2_op_dii
-	//	//// (Set the PC to interrupt RETurn address and enable Interrupts)
-	//	//instr_g2_op_reti
-	//	
-	//	default:
-	//	begin
-	//		alu_was_used <= 0;
-	//	end
-	//endcase
+	
+	if ( ( opcode >= pkg_instr_dec::instr_g2_op_inv )
+		&& ( opcode <= pkg_instr_dec::instr_g2_op_rorc ) )
+	begin
+		set_alu_dest_reg_pair( ra_index, 1 );
+	end
+	else if ( ( opcode >= pkg_instr_dec::instr_g2_op_ldfab )
+		&& ( opcode <= pkg_instr_dec::instr_g2_op_stfsa ) )
+	begin
+		set_alu_inputs_a16_b16( ra_index, 0, 1, 1 );
+	end
+	
+	else if ( ( ( opcode >= pkg_instr_dec::instr_g2_op_add )
+		&& ( opcode <= pkg_instr_dec::instr_g2_op_cmp ) )
+		|| ( opcode == pkg_instr_dec::instr_g2_op_and )
+		|| ( ( opcode >= pkg_instr_dec::instr_g2_op_orr )
+		&& ( opcode <= pkg_instr_dec::instr_g2_op_ror ) ) )
+	begin
+		set_alu_inputs_a16_b16( ra_index, 
+			cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ], 1 );
+	end
+	
+	else if ( ( opcode >= pkg_instr_dec::instr_g2_op_ldpab )
+		&& ( opcode <= pkg_instr_dec::instr_g2_op_stpsa ) )
+	begin
+		set_alu_inputs_a16_b16( `make_reg_ind_from_pi(rb_index), 0, 2, 
+			1 );
+	end
+	
 	
 	case (opcode)
 		// -- rA, rB --
-		
-		//// Copy instructions:
-		//// (CoPY from reg rB to reg rA)
-		//pkg_instr_dec::instr_g2_op_cpyb:
-		//begin
-		//	
-		//end
-		
 		
 		// -- rAp --
 		// Complement instructions with one reg pair operand (rB ignored):
 		// (one's complement of rAp)
 		pkg_instr_dec::instr_g2_op_inv:
 		begin
-			do_alu_op_inv(ra_index);
+			//do_alu_op_inv(ra_index);
+			finish_do_alu_op_inv();
 		end
 		// (two's complement of rAp)
 		pkg_instr_dec::instr_g2_op_neg:
 		begin
-			do_alu_op_neg(ra_index);
+			//do_alu_op_neg(ra_index);
+			finish_do_alu_op_neg();
 		end
 		
 		// Bit rotating instructions that use carry as bit 16 for a 17-bit
 		// rotate of { carry, rAp } by one bit:
 		pkg_instr_dec::instr_g2_op_rolc:
 		begin
-			do_alu_op_rolc(ra_index);
+			//do_alu_op_rolc(ra_index);
+			finish_do_alu_op_rolc();
 		end
 		pkg_instr_dec::instr_g2_op_rorc:
 		begin
-			do_alu_op_rorc(ra_index);
+			//do_alu_op_rorc(ra_index);
+			finish_do_alu_op_rorc();
 		end
-		
-		//// Call instruction (Description:  sets the link register to the
-		//// return address, then sets the program counter to the address
-		//// contained in the reg pair rAp):
-		//// (CALL subroutine at address in reg pair rAp)
-		//pkg_instr_dec::instr_g2_op_call:
-		//begin
-		//	
-		//end
-		
-		
-		//// PC Copy Instructions:
-		//// (CoPY FRom PC to reg pair rAp (this can be used for pc-relative
-		//// loads and stores))
-		//pkg_instr_dec::instr_g2_op_cpyfrpc:
-		//begin
-		//	
-		//end
-		//
-		//// (Copy rAp to the pc)
-		//pkg_instr_dec::instr_g2_op_jump:
-		//begin
-		//	
-		//end
-		//
-		//// Extra Interrupt Instructions:
-		//// (Swap the Interrupt Return Address and rAp)
-		//pkg_instr_dec::instr_g2_op_swpira:
-		//begin
-		//	
-		//end
-		//// (CoPY the Interrupt Return Address to rAp)
-		//pkg_instr_dec::instr_g2_op_cpyira:
-		//begin
-		//	
-		//end
-		//
-		//// Flags Instructions:
-		//// (Clear reg rAp, then CoPY FRom Flags to reg rAp)
-		//pkg_instr_dec::instr_g2_op_cpyfrf:
-		//begin
-		//	
-		//end
-		//// (CoPY TO Flags from reg rAp)
-		//pkg_instr_dec::instr_g2_op_cpytof:
-		//begin
-		//	
-		//end
 		
 		// (Add 1 to the reg pair rAp, then LoaD a byte, from the updated
 		// address in rAp, containing processor Flags (other bits cleared)
 		// into the processor flags)
 		pkg_instr_dec::instr_g2_op_ldfab:
 		begin
-			do_alu_op_add_no_flags( ra_index, 0, 1 );
+			//do_alu_op_add_no_flags( ra_index, 0, 1 );
+			finish_do_alu_op_add_no_flags();
 		end
 		
 		// (STore a byte containing the current processor flags (other bits
@@ -1476,23 +1182,9 @@ task prep_alu_instr_grp_2_generic;
 		// Subtract 1 from the reg pair rAp)
 		pkg_instr_dec::instr_g2_op_stfsa:
 		begin
-			do_alu_op_sub_no_flags( ra_index, 0, 1 );
+			//do_alu_op_sub_no_flags( ra_index, 0, 1 );
+			finish_do_alu_op_sub_no_flags();
 		end
-		
-		
-		
-		//// -- rA, rBp --
-		//// 8-bit Load/store instructions:
-		//// (LoaD contents into Register rA from memory at address in rBp)
-		//pkg_instr_dec::instr_g2_op_ldr:
-		//begin
-		//	
-		//end
-		//// (STore Register rA contents to memory at address in rBp)
-		//pkg_instr_dec::instr_g2_op_str:
-		//begin
-		//	
-		//end
 		
 		
 		
@@ -1501,33 +1193,38 @@ task prep_alu_instr_grp_2_generic;
 		// Arithmetic instructions:
 		pkg_instr_dec::instr_g2_op_add:
 		begin
-			do_alu_op_add( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_add( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_add();
 		end
 		pkg_instr_dec::instr_g2_op_adc:
 		begin
-			do_alu_op_adc( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_adc( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_adc();
 		end
 		pkg_instr_dec::instr_g2_op_sub:
 		begin
-			do_alu_op_sub( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_sub( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_sub();
 		end
 		pkg_instr_dec::instr_g2_op_sbc:
 		begin
-			do_alu_op_sbc( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_sbc( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_sbc();
 		end
 		pkg_instr_dec::instr_g2_op_cmp:
 		begin
-			do_alu_op_cmp( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_cmp( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_cmp();
 		end
 		
 		// (Unsigned MULtiplies rAp and rBp and stores 32-bit result in
@@ -1554,9 +1251,10 @@ task prep_alu_instr_grp_2_generic;
 		// Bitwise instructions with two reg pair operands:
 		pkg_instr_dec::instr_g2_op_and:
 		begin
-			do_alu_op_and( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_and( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_and();
 		end
 		// (same thing as "and" but only affects flags)
 		pkg_instr_dec::instr_g2_op_tst:
@@ -1567,15 +1265,17 @@ task prep_alu_instr_grp_2_generic;
 		end
 		pkg_instr_dec::instr_g2_op_orr:
 		begin
-			do_alu_op_orr( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_orr( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_orr();
 		end
 		pkg_instr_dec::instr_g2_op_xor:
 		begin
-			do_alu_op_xor( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_xor( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_xor();
 		end
 		
 		// Bitshifting (and rotating) instructions that do a 16-bit shift
@@ -1583,98 +1283,58 @@ task prep_alu_instr_grp_2_generic;
 		// to shift by:
 		pkg_instr_dec::instr_g2_op_lsl:
 		begin
-			do_alu_op_lsl( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_lsl( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_lsl();
 		end
 		pkg_instr_dec::instr_g2_op_lsr:
 		begin
-			do_alu_op_lsr( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_lsr( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_lsr();
 		end
 		pkg_instr_dec::instr_g2_op_asr:
 		begin
-			do_alu_op_asr( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_asr( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_asr();
 		end
 		pkg_instr_dec::instr_g2_op_rol:
 		begin
-			do_alu_op_rol( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_rol( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_rol();
 		end
 		pkg_instr_dec::instr_g2_op_ror:
 		begin
-			do_alu_op_ror( ra_index, 
-				cpu_regs[`make_reg_ind_from_pi(rb_index)],
-				cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			//do_alu_op_ror( ra_index, 
+			//	cpu_regs[`make_reg_ind_from_pi(rb_index)],
+			//	cpu_regs[ `make_reg_ind_from_pi(rb_index) + 1 ] );
+			finish_do_alu_op_ror();
 		end
-		
-		//// (CoPY from reg pair rBp to reg Pair rAp)
-		//pkg_instr_dec::instr_g2_op_cpy:
-		//begin
-		//	
-		//end
-		//
-		//// 16-bit Load/store instructions:
-		//// (LoaD contents into reg Pair rAp from memory at address in rBp)
-		//pkg_instr_dec::instr_g2_op_ldp:
-		//begin
-		//	
-		//end
-		//// (STore reg Pair rAp contents to memory at address in rBp)
-		//pkg_instr_dec::instr_g2_op_stp:
-		//begin
-		//	
-		//end
 		
 		// 16-bit Push/pop style instructions:
 		// (Add 2 the reg pair rBp, then LoaD contents into reg pair rAp
 		// from memory at address contained in reg pair rBp)
 		pkg_instr_dec::instr_g2_op_ldpab:
 		begin
-			do_alu_op_add_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
-				2 );
+			//do_alu_op_add_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
+			//	2 );
+			finish_do_alu_op_add_no_flags();
 		end
 		
 		// (STore reg Pair rAp to memory at address contained in reg pair
 		// rBp, then Subtract 2 from the reg pair rBp)
 		pkg_instr_dec::instr_g2_op_stpsa:
 		begin
-			do_alu_op_sub_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
-				2 );
+			//do_alu_op_sub_no_flags( `make_reg_ind_from_pi(rb_index), 0, 
+			//	2 );
+			finish_do_alu_op_sub_no_flags();
 		end
-		
-		
-		
-		
-		//// -- no args --
-		//// Interrupt instructions (these ignore BOTH rA and rB):
-		//
-		//// (ENable Interrupts)
-		//pkg_instr_dec::instr_g2_op_eni:
-		//begin
-		//	
-		//end
-		//// (DIsable Interrupts)
-		//pkg_instr_dec::instr_g2_op_dii:
-		//begin
-		//	
-		//end
-		//// (Set the PC to interrupt RETurn address and enable Interrupts)
-		//pkg_instr_dec::instr_g2_op_reti:
-		//begin
-		//	
-		//end
-		//
-		//// (Set the PC to the Interrupt Return Address, but DON'T enable
-		//// interrupts)
-		//pkg_instr_dec::instr_g2_op_jumpira:
-		//begin
-		//	
-		//end
 		
 		default:
 		begin
