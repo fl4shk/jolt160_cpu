@@ -153,7 +153,8 @@ module tb_memory
 				begin
 					// Write 16-bit data
 					`make_mem_pair(addr_in) <= write_data_in_16;
-					$display( "16-bit write:  %h", write_data_in_16 );
+					$display( "16-bit write:  %h, %h", addr_in,
+						write_data_in_16 );
 				end
 			end
 		end

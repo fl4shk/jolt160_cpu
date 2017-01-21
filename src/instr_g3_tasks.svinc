@@ -57,7 +57,7 @@ task disassemble_grp_3_instr;
 	end
 	
 	// (Load 16-bit value from memory at address [rBp + rCp] into rAp)
-	if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_ldpx )
+	else if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_ldpx )
 	begin
 		$display( "ldpx r%dp, r%dp, r%dp", 
 			`make_reg_ind_from_pi(final_ig3_ra_index),
@@ -66,7 +66,7 @@ task disassemble_grp_3_instr;
 	end
 	
 	// (Store rAp to memory at address [rBp + rCp])
-	if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_stpx )
+	else if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_stpx )
 	begin
 		$display( "stpx r%dp, r%dp, r%dp", 
 			`make_reg_ind_from_pi(final_ig3_ra_index),
