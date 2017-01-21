@@ -1537,6 +1537,8 @@ task prep_alu_instr_grp_2_generic;
 			{ `make_reg_pair_w_pi(0), `make_reg_pair_w_pi(1) }
 				<= `make_reg_pair_w_pi(ra_index) 
 				* `make_reg_pair_w_pi(rb_index);
+			alu_dest_reg_was_modded <= 0;
+			alu_modded_proc_flags <= 0;
 		end
 		// (Signed MULtiplies rAp and rBp and stores 32-bit result in
 		// r0p:r2p)
@@ -1545,6 +1547,8 @@ task prep_alu_instr_grp_2_generic;
 			{ `make_reg_pair_w_pi(0), `make_reg_pair_w_pi(1) }
 				<= $signed(`make_reg_pair_w_pi(ra_index))
 				* $signed(`make_reg_pair_w_pi(rb_index));
+			alu_dest_reg_was_modded <= 0;
+			alu_modded_proc_flags <= 0;
 		end
 		
 		// Bitwise instructions with two reg pair operands:
@@ -2082,303 +2086,508 @@ task start_exec_instr_from_grp_2;
 	//	
 	//endcase
 	
-	case (final_ig2_opcode)
-		// -- rA, rB --
+	//case (final_ig2_opcode)
+	//	// -- rA, rB --
+	//	
+	//	//// Copy instructions:
+	//	//// (CoPY from reg rB to reg rA)
+	//	//pkg_instr_dec::instr_g2_op_cpyb:
+	//	//begin
+	//	//	set_reg( final_ig2_ra_index, `get_final_ig2_reg_b );
+	//	//end
+	//	
+	//	
+	//	//// -- rAp --
+	//	//// Complement instructions with one reg pair operand (rB ignored):
+	//	//// (one's complement of rAp)
+	//	//pkg_instr_dec::instr_g2_op_inv:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//// (two's complement of rAp)
+	//	//pkg_instr_dec::instr_g2_op_neg:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//
+	//	//// Bit rotating instructions that use carry as bit 16 for a 17-bit
+	//	//// rotate of { carry, rAp } by one bit:
+	//	//pkg_instr_dec::instr_g2_op_rolc:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_rorc:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	
+	//	// Call instruction (Description:  sets the link register to the
+	//	// return address, then sets the program counter to the address
+	//	// contained in the reg pair rAp):
+	//	// (CALL subroutine at address in reg pair rAp)
+	//	pkg_instr_dec::instr_g2_op_call:
+	//	begin
+	//		//`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
+	//		//`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
+	//		
+	//		//`get_cpu_rp_lr <= `get_cpu_rp_pc; 
+	//		//
+	//		//// Add `instr_16_num_bytes (2) to the destination address
+	//		//set_pc_and_dio_addr( `get_final_ig2_rpair_a 
+	//		//	+ `instr_16_num_bytes );
+	//		
+	//		//exec_any_call( `get_final_ig2_rpair_a + `instr_16_num_bytes );
+	//		exec_any_call(`get_final_ig2_rpair_a);
+	//	end
+	//	
+	//	
+	//	// PC Copy Instructions:
+	//	// (CoPY FRom PC to reg pair rAp (this can be used for pc-relative
+	//	// loads and stores))
+	//	pkg_instr_dec::instr_g2_op_cpyfrpc:
+	//	begin
+	//		set_reg_pair_with_pi( final_ig2_ra_index, `get_cpu_rp_pc );
+	//	end
+	//	
+	//	// (Copy rAp to the pc)
+	//	pkg_instr_dec::instr_g2_op_jump:
+	//	begin
+	//		set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind,
+	//			`make_reg_pair_w_pi(final_ig2_ra_index) );
+	//	end
+	//	
+	//	// Extra Interrupt Instructions:
+	//	// (Swap the Interrupt Return Address and rAp)
+	//	pkg_instr_dec::instr_g2_op_swpira:
+	//	begin
+	//		int_ret_addr <= `get_final_ig2_rpair_a;
+	//		set_reg_pair_with_pi( final_ig2_ra_index, int_ret_addr );
+	//	end
+	//	// (CoPY the Interrupt Return Address to rAp)
+	//	pkg_instr_dec::instr_g2_op_cpyira:
+	//	begin
+	//		set_reg_pair_with_pi( final_ig2_ra_index, int_ret_addr );
+	//	end
+	//	
+	//	// Flags Instructions:
+	//	// (Clear reg rAp, then CoPY FRom Flags to reg rAp)
+	//	pkg_instr_dec::instr_g2_op_cpyfrf:
+	//	begin
+	//		set_reg_pair_with_pi( final_ig2_ra_index, true_proc_flags );
+	//	end
+	//	// (CoPY TO Flags from reg rAp)
+	//	pkg_instr_dec::instr_g2_op_cpytof:
+	//	begin
+	//		true_proc_flags <= `get_final_ig2_rpair_a;
+	//	end
+	//	
+	//	// (Add 1 to the reg pair rAp, then LoaD a byte, from the updated
+	//	// address in rAp, containing processor Flags (other bits cleared)
+	//	// into the processor flags)
+	//	pkg_instr_dec::instr_g2_op_ldfab:
+	//	begin
+	//		// Load from memory at address contained in new reg pair rBp
+	//		prep_load_8_with_addr(`get_alu_out_16);
+	//		finish_alu_op_with_dest_rpair();
+	//		//did_prep_ldst_instr <= 0;
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	
+	//	// (STore a byte containing the current processor flags (other bits
+	//	// cleared) to memory at address contained in reg pair rAp, then
+	//	// Subtract 1 from the reg pair rAp)
+	//	pkg_instr_dec::instr_g2_op_stfsa:
+	//	begin
+	//		// Store to memory at address contained in old reg pair rBp
+	//		prep_store_8( true_proc_flags, `get_final_ig2_rpair_b );
+	//		finish_alu_op_with_dest_rpair();
+	//		//did_prep_ldst_instr <= 0;
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	
+	//	
+	//	
+	//	// -- rA, rBp --
+	//	// 8-bit Load/store instructions:
+	//	// (LoaD contents into Register rA from memory at address in rBp)
+	//	pkg_instr_dec::instr_g2_op_ldr:
+	//	begin
+	//		prep_load_8_with_addr(`get_final_ig2_rpair_b);
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	// (STore Register rA contents to memory at address in rBp)
+	//	pkg_instr_dec::instr_g2_op_str:
+	//	begin
+	//		prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	
+	//	
+	//	
+	//	// -- rAp, rBp --
+	//	
+	//	//// Arithmetic instructions:
+	//	//pkg_instr_dec::instr_g2_op_add:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_adc:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_sub:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_sbc:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_cmp:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//// (Unsigned MULtiplies rAp and rBp and stores 32-bit result in
+	//	//// r0p:r2p)
+	//	//pkg_instr_dec::instr_g2_op_umull:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//// (Signed MULtiplies rAp and rBp and stores 32-bit result in
+	//	//// r0p:r2p)
+	//	//pkg_instr_dec::instr_g2_op_smull:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//
+	//	//// Bitwise instructions with two reg pair operands:
+	//	//pkg_instr_dec::instr_g2_op_and:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//// (same thing as "and" but only affects flags)
+	//	//pkg_instr_dec::instr_g2_op_tst:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_orr:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_xor:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//
+	//	//// Bitshifting (and rotating) instructions that do a 16-bit shift
+	//	//// or rotate on the reg pair rAp, using rBp as the number of bits
+	//	//// to shift by:
+	//	//pkg_instr_dec::instr_g2_op_lsl:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_lsr:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_asr:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_rol:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	//pkg_instr_dec::instr_g2_op_ror:
+	//	//begin
+	//	//	finish_alu_op_with_dest_rpair();
+	//	//end
+	//	
+	//	// (CoPY from reg pair rBp to reg Pair rAp)
+	//	pkg_instr_dec::instr_g2_op_cpy:
+	//	begin
+	//		//`get_final_ig2_rpair_a <= `get_final_ig2_rpair_b;
+	//		set_reg_pair_with_pi( final_ig2_ra_index, 
+	//			`get_final_ig2_rpair_b );
+	//	end
+	//	
+	//	// 16-bit Load/store instructions:
+	//	// (LoaD contents into reg Pair rAp from memory at address in rBp)
+	//	pkg_instr_dec::instr_g2_op_ldp:
+	//	begin
+	//		prep_load_16_with_addr(`get_final_ig2_rpair_b);
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	// (STore reg Pair rAp contents to memory at address in rBp)
+	//	pkg_instr_dec::instr_g2_op_stp:
+	//	begin
+	//		prep_store_16( `get_final_ig2_rpair_a, 
+	//			`get_final_ig2_rpair_b );
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	
+	//	// 16-bit Push/pop style instructions:
+	//	// (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
+	//	// from memory at address contained in reg pair rBp)
+	//	pkg_instr_dec::instr_g2_op_ldpab:
+	//	begin
+	//		// Load from memory at address contained in new reg pair rBp
+	//		prep_load_16_with_addr(`get_alu_out_16);
+	//		finish_alu_op_with_dest_rpair();
+	//		//did_prep_ldst_instr <= 0;
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	
+	//	// (STore reg Pair rAp to memory at address contained in reg pair
+	//	// rBp, then Subtract 1 from the reg pair rBp)
+	//	pkg_instr_dec::instr_g2_op_stpsa:
+	//	begin
+	//		// Store to memory at address contained in old reg pair rBp
+	//		prep_store_16( `get_final_ig2_rpair_a, 
+	//			`get_final_ig2_rpair_b );
+	//		finish_alu_op_with_dest_rpair();
+	//		//did_prep_ldst_instr <= 0;
+	//		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	//	end
+	//	
+	//	
+	//	
+	//	
+	//	// -- no args --
+	//	// Interrupt instructions (these ignore BOTH rA and rB):
+	//	
+	//	// (ENable Interrupts)
+	//	pkg_instr_dec::instr_g2_op_eni:
+	//	begin
+	//		//$display("WARNING!  eni is not yet implemented!");
+	//		ints_enabled <= 1;
+	//	end
+	//	// (DIsable Interrupts)
+	//	pkg_instr_dec::instr_g2_op_dii:
+	//	begin
+	//		//$display("WARNING!  dii is not yet implemented!");
+	//		ints_enabled <= 0;
+	//	end
+	//	// (Set the PC to interrupt RETurn address and enable Interrupts)
+	//	pkg_instr_dec::instr_g2_op_reti:
+	//	begin
+	//		set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, int_ret_addr );
+	//		ints_enabled <= 1;
+	//	end
+	//	
+	//	// (Set the PC to the Interrupt Return Address, but DON'T enable
+	//	// interrupts)
+	//	pkg_instr_dec::instr_g2_op_jumpira:
+	//	begin
+	//		set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, int_ret_addr );
+	//	end
+	//	
+	//endcase
+	
+	// Copy instructions:
+	// (CoPY from reg rB to reg rA)
+	if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyb )
+	begin
+		set_reg( final_ig2_ra_index, `get_final_ig2_reg_b );
+	end
+	
+	// Various ALU instructions
+	else if ( ( ( final_ig2_opcode >= pkg_instr_dec::instr_g2_op_inv )
+		&& ( final_ig2_opcode <= pkg_instr_dec::instr_g2_op_rorc ) )
+		|| ( ( final_ig2_opcode >= pkg_instr_dec::instr_g2_op_add )
+		&& ( final_ig2_opcode <= pkg_instr_dec::instr_g2_op_ror ) ) )
+	begin
+		finish_alu_op_with_dest_rpair();
+	end
+	
+	// Call instruction (Description:  sets the link register to the
+	// return address, then sets the program counter to the address
+	// contained in the reg pair rAp):
+	// (CALL subroutine at address in reg pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_call )
+	begin
+		//`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
+		//`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
 		
-		// Copy instructions:
-		// (CoPY from reg rB to reg rA)
-		pkg_instr_dec::instr_g2_op_cpyb:
-		begin
-			set_reg( final_ig2_ra_index, `get_final_ig2_reg_b );
-		end
+		//`get_cpu_rp_lr <= `get_cpu_rp_pc; 
+		//
+		//// Add `instr_16_num_bytes (2) to the destination address
+		//set_pc_and_dio_addr( `get_final_ig2_rpair_a 
+		//	+ `instr_16_num_bytes );
 		
+		//exec_any_call( `get_final_ig2_rpair_a + `instr_16_num_bytes );
+		exec_any_call(`get_final_ig2_rpair_a);
+	end
+	
+	
+	// PC Copy Instructions:
+	// (CoPY FRom PC to reg pair rAp (this can be used for pc-relative
+	// loads and stores))
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyfrpc )
+	begin
+		set_reg_pair_with_pi( final_ig2_ra_index, `get_cpu_rp_pc );
+	end
+	
+	// (Copy rAp to the pc)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_jump )
+	begin
+		set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind,
+			`make_reg_pair_w_pi(final_ig2_ra_index) );
+	end
+	
+	// Extra Interrupt Instructions:
+	// (Swap the Interrupt Return Address and rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_swpira )
+	begin
+		int_ret_addr <= `get_final_ig2_rpair_a;
+		set_reg_pair_with_pi( final_ig2_ra_index, int_ret_addr );
+	end
+	// (CoPY the Interrupt Return Address to rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyira )
+	begin
+		set_reg_pair_with_pi( final_ig2_ra_index, int_ret_addr );
+	end
+	
+	// Flags Instructions:
+	// (Clear reg rAp, then CoPY FRom Flags to reg rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpyfrf )
+	begin
+		set_reg_pair_with_pi( final_ig2_ra_index, true_proc_flags );
+	end
+	// (CoPY TO Flags from reg rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpytof )
+	begin
+		true_proc_flags <= `get_final_ig2_rpair_a;
+	end
+	
+	// (Add 1 to the reg pair rAp, then LoaD a byte, from the updated
+	// address in rAp, containing processor Flags (other bits cleared)
+	// into the processor flags)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldfab )
+	begin
+		// Load from memory at address contained in new reg pair rBp
+		prep_load_8_with_addr(`get_alu_out_16);
+		finish_alu_op_with_dest_rpair();
+		//did_prep_ldst_instr <= 0;
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	
+	// (STore a byte containing the current processor flags (other bits
+	// cleared) to memory at address contained in reg pair rAp, then
+	// Subtract 1 from the reg pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_stfsa )
+	begin
+		// Store to memory at address contained in old reg pair rBp
+		prep_store_8( true_proc_flags, `get_final_ig2_rpair_b );
+		finish_alu_op_with_dest_rpair();
+		//did_prep_ldst_instr <= 0;
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	
+	
+	
+	// -- rA, rBp --
+	// 8-bit Load/store instructions:
+	// (LoaD contents into Register rA from memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldr )
+	begin
+		prep_load_8_with_addr(`get_final_ig2_rpair_b);
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	// (STore Register rA contents to memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_str )
+	begin
+		prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	
+	
+	
+	
+	// (CoPY from reg pair rBp to reg Pair rAp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_cpy )
+	begin
+		//`get_final_ig2_rpair_a <= `get_final_ig2_rpair_b;
+		set_reg_pair_with_pi( final_ig2_ra_index, 
+			`get_final_ig2_rpair_b );
+	end
+	
+	// 16-bit Load/store instructions:
+	// (LoaD contents into reg Pair rAp from memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldp )
+	begin
+		prep_load_16_with_addr(`get_final_ig2_rpair_b);
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	// (STore reg Pair rAp contents to memory at address in rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_stp )
+	begin
+		prep_store_16( `get_final_ig2_rpair_a, 
+			`get_final_ig2_rpair_b );
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	
+	// 16-bit Push/pop style instructions:
+	// (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
+	// from memory at address contained in reg pair rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_ldpab )
+	begin
+		// Load from memory at address contained in new reg pair rBp
+		prep_load_16_with_addr(`get_alu_out_16);
+		finish_alu_op_with_dest_rpair();
+		//did_prep_ldst_instr <= 0;
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	
+	// (STore reg Pair rAp to memory at address contained in reg pair
+	// rBp, then Subtract 1 from the reg pair rBp)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_stpsa )
+	begin
+		// Store to memory at address contained in old reg pair rBp
+		prep_store_16( `get_final_ig2_rpair_a, 
+			`get_final_ig2_rpair_b );
+		finish_alu_op_with_dest_rpair();
+		//did_prep_ldst_instr <= 0;
+		curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+	end
+	
+	
+	
+	
+	// -- no args --
+	// Interrupt instructions (these ignore BOTH rA and rB):
+	
+	// (ENable Interrupts)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_eni )
+	begin
+		//$display("WARNING!  eni is not yet implemented!");
+		ints_enabled <= 1;
+	end
+	// (DIsable Interrupts)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_dii )
+	begin
+		//$display("WARNING!  dii is not yet implemented!");
+		ints_enabled <= 0;
+	end
+	// (Set the PC to interrupt RETurn address and enable Interrupts)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_reti )
+	begin
+		set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, int_ret_addr );
+		ints_enabled <= 1;
+	end
+	
+	// (Set the PC to the Interrupt Return Address, but DON'T enable
+	// interrupts)
+	else if ( final_ig2_opcode == pkg_instr_dec::instr_g2_op_jumpira )
+	begin
+		set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, int_ret_addr );
+	end
+	
+	else
+	begin
 		
-		// -- rAp --
-		// Complement instructions with one reg pair operand (rB ignored):
-		// (one's complement of rAp)
-		pkg_instr_dec::instr_g2_op_inv:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		// (two's complement of rAp)
-		pkg_instr_dec::instr_g2_op_neg:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		
-		// Bit rotating instructions that use carry as bit 16 for a 17-bit
-		// rotate of { carry, rAp } by one bit:
-		pkg_instr_dec::instr_g2_op_rolc:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_rorc:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		
-		// Call instruction (Description:  sets the link register to the
-		// return address, then sets the program counter to the address
-		// contained in the reg pair rAp):
-		// (CALL subroutine at address in reg pair rAp)
-		pkg_instr_dec::instr_g2_op_call:
-		begin
-			//`get_cpu_rp_lr <= `get_pc_after_reg_instr; 
-			//`get_cpu_rp_pc <= `get_final_ig2_rpair_a;
-			
-			//`get_cpu_rp_lr <= `get_cpu_rp_pc; 
-			//
-			//// Add `instr_16_num_bytes (2) to the destination address
-			//set_pc_and_dio_addr( `get_final_ig2_rpair_a 
-			//	+ `instr_16_num_bytes );
-			
-			//exec_any_call( `get_final_ig2_rpair_a + `instr_16_num_bytes );
-			exec_any_call(`get_final_ig2_rpair_a);
-		end
-		
-		
-		// PC Copy Instructions:
-		// (CoPY FRom PC to reg pair rAp (this can be used for pc-relative
-		// loads and stores))
-		pkg_instr_dec::instr_g2_op_cpyfrpc:
-		begin
-			set_reg_pair_with_pi( final_ig2_ra_index, `get_cpu_rp_pc );
-		end
-		
-		// (Copy rAp to the pc)
-		pkg_instr_dec::instr_g2_op_jump:
-		begin
-			set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind,
-				`make_reg_pair_w_pi(final_ig2_ra_index) );
-		end
-		
-		// Extra Interrupt Instructions:
-		// (Swap the Interrupt Return Address and rAp)
-		pkg_instr_dec::instr_g2_op_swpira:
-		begin
-			int_ret_addr <= `get_final_ig2_rpair_a;
-			set_reg_pair_with_pi( final_ig2_ra_index, int_ret_addr );
-		end
-		// (CoPY the Interrupt Return Address to rAp)
-		pkg_instr_dec::instr_g2_op_cpyira:
-		begin
-			set_reg_pair_with_pi( final_ig2_ra_index, int_ret_addr );
-		end
-		
-		// Flags Instructions:
-		// (Clear reg rAp, then CoPY FRom Flags to reg rAp)
-		pkg_instr_dec::instr_g2_op_cpyfrf:
-		begin
-			set_reg_pair_with_pi( final_ig2_ra_index, true_proc_flags );
-		end
-		// (CoPY TO Flags from reg rAp)
-		pkg_instr_dec::instr_g2_op_cpytof:
-		begin
-			true_proc_flags <= `get_final_ig2_rpair_a;
-		end
-		
-		// (Add 1 to the reg pair rAp, then LoaD a byte, from the updated
-		// address in rAp, containing processor Flags (other bits cleared)
-		// into the processor flags)
-		pkg_instr_dec::instr_g2_op_ldfab:
-		begin
-			// Load from memory at address contained in new reg pair rBp
-			prep_load_8_with_addr(`get_alu_out_16);
-			finish_alu_op_with_dest_rpair();
-			//did_prep_ldst_instr <= 0;
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		
-		// (STore a byte containing the current processor flags (other bits
-		// cleared) to memory at address contained in reg pair rAp, then
-		// Subtract 1 from the reg pair rAp)
-		pkg_instr_dec::instr_g2_op_stfsa:
-		begin
-			// Store to memory at address contained in old reg pair rBp
-			prep_store_8( true_proc_flags, `get_final_ig2_rpair_b );
-			finish_alu_op_with_dest_rpair();
-			//did_prep_ldst_instr <= 0;
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		
-		
-		
-		// -- rA, rBp --
-		// 8-bit Load/store instructions:
-		// (LoaD contents into Register rA from memory at address in rBp)
-		pkg_instr_dec::instr_g2_op_ldr:
-		begin
-			prep_load_8_with_addr(`get_final_ig2_rpair_b);
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		// (STore Register rA contents to memory at address in rBp)
-		pkg_instr_dec::instr_g2_op_str:
-		begin
-			prep_store_8( `get_final_ig2_reg_a, `get_final_ig2_rpair_b );
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		
-		
-		
-		// -- rAp, rBp --
-		
-		// Arithmetic instructions:
-		pkg_instr_dec::instr_g2_op_add:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_adc:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_sub:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_sbc:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_cmp:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		// (Unsigned MULtiplies rAp and rBp and stores 32-bit result in
-		// r0p:r2p)
-		pkg_instr_dec::instr_g2_op_umull:
-		begin
-			//finish_alu_op_with_dest_rpair();
-		end
-		// (Signed MULtiplies rAp and rBp and stores 32-bit result in
-		// r0p:r2p)
-		pkg_instr_dec::instr_g2_op_smull:
-		begin
-			//finish_alu_op_with_dest_rpair();
-		end
-		
-		// Bitwise instructions with two reg pair operands:
-		pkg_instr_dec::instr_g2_op_and:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		// (same thing as "and" but only affects flags)
-		pkg_instr_dec::instr_g2_op_tst:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_orr:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_xor:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		
-		// Bitshifting (and rotating) instructions that do a 16-bit shift
-		// or rotate on the reg pair rAp, using rBp as the number of bits
-		// to shift by:
-		pkg_instr_dec::instr_g2_op_lsl:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_lsr:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_asr:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_rol:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g2_op_ror:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		
-		// (CoPY from reg pair rBp to reg Pair rAp)
-		pkg_instr_dec::instr_g2_op_cpy:
-		begin
-			//`get_final_ig2_rpair_a <= `get_final_ig2_rpair_b;
-			set_reg_pair_with_pi( final_ig2_ra_index, 
-				`get_final_ig2_rpair_b );
-		end
-		
-		// 16-bit Load/store instructions:
-		// (LoaD contents into reg Pair rAp from memory at address in rBp)
-		pkg_instr_dec::instr_g2_op_ldp:
-		begin
-			prep_load_16_with_addr(`get_final_ig2_rpair_b);
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		// (STore reg Pair rAp contents to memory at address in rBp)
-		pkg_instr_dec::instr_g2_op_stp:
-		begin
-			prep_store_16( `get_final_ig2_rpair_a, 
-				`get_final_ig2_rpair_b );
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		
-		// 16-bit Push/pop style instructions:
-		// (Add 1 the reg pair rBp, then LoaD contents into reg pair rAp
-		// from memory at address contained in reg pair rBp)
-		pkg_instr_dec::instr_g2_op_ldpab:
-		begin
-			// Load from memory at address contained in new reg pair rBp
-			prep_load_16_with_addr(`get_alu_out_16);
-			finish_alu_op_with_dest_rpair();
-			//did_prep_ldst_instr <= 0;
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		
-		// (STore reg Pair rAp to memory at address contained in reg pair
-		// rBp, then Subtract 1 from the reg pair rBp)
-		pkg_instr_dec::instr_g2_op_stpsa:
-		begin
-			// Store to memory at address contained in old reg pair rBp
-			prep_store_16( `get_final_ig2_rpair_a, 
-				`get_final_ig2_rpair_b );
-			finish_alu_op_with_dest_rpair();
-			//did_prep_ldst_instr <= 0;
-			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-		end
-		
-		
-		
-		
-		// -- no args --
-		// Interrupt instructions (these ignore BOTH rA and rB):
-		
-		// (ENable Interrupts)
-		pkg_instr_dec::instr_g2_op_eni:
-		begin
-			//$display("WARNING!  eni is not yet implemented!");
-			ints_enabled <= 1;
-		end
-		// (DIsable Interrupts)
-		pkg_instr_dec::instr_g2_op_dii:
-		begin
-			//$display("WARNING!  dii is not yet implemented!");
-			ints_enabled <= 0;
-		end
-		// (Set the PC to interrupt RETurn address and enable Interrupts)
-		pkg_instr_dec::instr_g2_op_reti:
-		begin
-			set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, int_ret_addr );
-			ints_enabled <= 1;
-		end
-		
-		// (Set the PC to the Interrupt Return Address, but DON'T enable
-		// interrupts)
-		pkg_instr_dec::instr_g2_op_jumpira:
-		begin
-			set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, int_ret_addr );
-		end
-		
-	endcase
+	end
+	
 	
 	if (!final_ig2_instr_is_ldst)
 	begin

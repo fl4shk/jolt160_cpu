@@ -242,54 +242,71 @@ task prep_alu_instr_grp_1_generic;
 	//	end
 	//endcase
 	
-	case (opcode)
-		// Arithmetic instructions:
-		// (ADD 8-bit Immediate value to reg Pair rAp)
-		pkg_instr_dec::instr_g1_op_addi:
-		begin
-			do_alu_op_add( ra_index, `cpu_imm_value_8_width'h0, 
-				imm_value_8 );
-		end
-		// (SuBtract 8-bit Immediate value from reg Pair rAp)
-		pkg_instr_dec::instr_g1_op_subi:
-		begin
-			do_alu_op_sub( ra_index, `cpu_imm_value_8_width'h0, 
-				imm_value_8 );
-		end
-		// (CoMPare reg pair rAp to 8-bit Immediate value)
-		pkg_instr_dec::instr_g1_op_cmpi:
-		begin
-			do_alu_op_cmp( ra_index, `cpu_imm_value_8_width'h0, 
-				imm_value_8 );
-		end
-		
-		// Bitshifting instructions with two operands (rAp and 8-bit
-		// Immediate value):
-		pkg_instr_dec::instr_g1_op_lsli:
-		begin
-			do_alu_op_lsl( ra_index, `cpu_imm_value_8_width'h0, 
-				imm_value_8 );
-		end
-		pkg_instr_dec::instr_g1_op_lsri:
-		begin
-			do_alu_op_lsr( ra_index, `cpu_imm_value_8_width'h0, 
-				imm_value_8 );
-		end
-		pkg_instr_dec::instr_g1_op_asri:
-		begin
-			do_alu_op_asr( ra_index, `cpu_imm_value_8_width'h0, 
-				imm_value_8 );
-		end
-		  
-		// Copy instructions:
-		
-		//// (CoPY Byte Immediate to register rA)
-		//instr_g1_op_cpybi
-		default:
-		begin
-			alu_was_used <= 0;
-		end
-	endcase
+	if ( ( opcode >= pkg_instr_dec::instr_g1_op_addi )
+		&& ( opcode <= pkg_instr_dec::instr_g1_op_asri ) )
+	begin
+		set_alu_inputs_a16_b16( ra_index, `cpu_imm_value_8_width'h0,
+			imm_value_8, 1 );
+		case (opcode)
+			// Arithmetic instructions:
+			// (ADD 8-bit Immediate value to reg Pair rAp)
+			pkg_instr_dec::instr_g1_op_addi:
+			begin
+				//do_alu_op_add( ra_index, `cpu_imm_value_8_width'h0, 
+				//	imm_value_8 );
+				finish_do_alu_op_add();
+			end
+			// (SuBtract 8-bit Immediate value from reg Pair rAp)
+			pkg_instr_dec::instr_g1_op_subi:
+			begin
+				//do_alu_op_sub( ra_index, `cpu_imm_value_8_width'h0, 
+				//	imm_value_8 );
+				finish_do_alu_op_sub();
+			end
+			// (CoMPare reg pair rAp to 8-bit Immediate value)
+			pkg_instr_dec::instr_g1_op_cmpi:
+			begin
+				//do_alu_op_cmp( ra_index, `cpu_imm_value_8_width'h0, 
+				//	imm_value_8 );
+				finish_do_alu_op_cmp();
+			end
+			
+			// Bitshifting instructions with two operands (rAp and 8-bit
+			// Immediate value):
+			pkg_instr_dec::instr_g1_op_lsli:
+			begin
+				//do_alu_op_lsl( ra_index, `cpu_imm_value_8_width'h0, 
+				//	imm_value_8 );
+				finish_do_alu_op_lsl();
+			end
+			pkg_instr_dec::instr_g1_op_lsri:
+			begin
+				//do_alu_op_lsr( ra_index, `cpu_imm_value_8_width'h0, 
+				//	imm_value_8 );
+				finish_do_alu_op_lsr;
+			end
+			pkg_instr_dec::instr_g1_op_asri:
+			begin
+				//do_alu_op_asr( ra_index, `cpu_imm_value_8_width'h0, 
+				//	imm_value_8 );
+				finish_do_alu_op_asr();
+			end
+			  
+			// Copy instructions:
+			
+			////// (CoPY Byte Immediate to register rA)
+			////instr_g1_op_cpybi
+			//default:
+			//begin
+			//	alu_was_used <= 0;
+			//end
+		endcase
+	end
+	
+	else
+	begin
+		alu_was_used <= 0;
+	end
 	
 	
 endtask
@@ -377,47 +394,57 @@ task start_exec_instr_from_grp_1;
 	//endcase
 	
 	
-	case (final_ig1_opcode)
-		// Arithmetic instructions:
-		// (ADD 8-bit Immediate value to reg Pair rAp)
-		pkg_instr_dec::instr_g1_op_addi:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		// (SuBtract 8-bit Immediate value from reg Pair rAp)
-		pkg_instr_dec::instr_g1_op_subi:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		// (CoMPare reg pair rAp to 8-bit Immediate value)
-		pkg_instr_dec::instr_g1_op_cmpi:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		
-		// Bitshifting instructions with two operands (rAp and 8-bit
-		// Immediate value):
-		pkg_instr_dec::instr_g1_op_lsli:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g1_op_lsri:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		pkg_instr_dec::instr_g1_op_asri:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		  
-		// Copy instructions:
-		
-		// (CoPY Byte Immediate to register rA)
-		pkg_instr_dec::instr_g1_op_cpybi:
-		begin
-			set_reg( final_ig1_ra_index, final_ig1_imm_value_8 );
-		end
-	endcase
+	//case (final_ig1_opcode)
+	//	// Arithmetic instructions:
+	//	// (ADD 8-bit Immediate value to reg Pair rAp)
+	//	pkg_instr_dec::instr_g1_op_addi:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	// (SuBtract 8-bit Immediate value from reg Pair rAp)
+	//	pkg_instr_dec::instr_g1_op_subi:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	// (CoMPare reg pair rAp to 8-bit Immediate value)
+	//	pkg_instr_dec::instr_g1_op_cmpi:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	
+	//	// Bitshifting instructions with two operands (rAp and 8-bit
+	//	// Immediate value):
+	//	pkg_instr_dec::instr_g1_op_lsli:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	pkg_instr_dec::instr_g1_op_lsri:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	pkg_instr_dec::instr_g1_op_asri:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	  
+	//	// Copy instructions:
+	//	
+	//	// (CoPY Byte Immediate to register rA)
+	//	pkg_instr_dec::instr_g1_op_cpybi:
+	//	begin
+	//		set_reg( final_ig1_ra_index, final_ig1_imm_value_8 );
+	//	end
+	//endcase
+	
+	if ( ( final_ig1_opcode >= pkg_instr_dec::instr_g1_op_addi )
+		&& ( final_ig1_opcode <= pkg_instr_dec::instr_g1_op_asri ) )
+	begin
+		finish_alu_op_with_dest_rpair();
+	end
+	else // if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpybi )
+	begin
+		set_reg( final_ig1_ra_index, final_ig1_imm_value_8 );
+	end
 	
 	if (!final_ig1_instr_is_ldst)
 	begin
