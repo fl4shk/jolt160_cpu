@@ -208,33 +208,6 @@ task finish_exec_ldst_instr;
 						$display("str:  Data IS READY");
 					end
 				end
-				pkg_instr_dec::instr_g2_op_ldrab:
-				begin
-					if (!data_ready)
-					begin
-						$display("ldrab:  Data NOT ready");
-					end
-					
-					else // if (data_ready)
-					begin
-						//`get_final_ig2_reg_a <= temp_data_in;
-						set_reg( final_ig2_ra_index, temp_data_in );
-						$display("ldrab:  Data IS READY");
-					end
-				end
-				pkg_instr_dec::instr_g2_op_strsa:
-				begin
-					// Wait a cycle
-					if (!data_ready)
-					begin
-						$display("strsa:  Data NOT ready");
-					end
-					
-					else // if (data_ready)
-					begin
-						$display("strsa:  Data IS READY");
-					end
-				end
 				pkg_instr_dec::instr_g2_op_ldfab:
 				begin
 					if (!data_ready)
@@ -262,6 +235,74 @@ task finish_exec_ldst_instr;
 						$display("stfsa:  Data IS READY");
 					end
 				end
+				
+				// 16-bit Load/store instructions: (LoaD contents into reg
+				// Pair rAp from memory at address in rBp)
+				pkg_instr_dec::instr_g2_op_ldp:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldp:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						set_reg_pair_with_pi( final_ig2_ra_index,
+							temp_data_in );
+						$display("ldp:  Data IS READY");
+					end
+				end
+				// (STore reg Pair rAp contents to memory at address in
+				// rBp)
+				pkg_instr_dec::instr_g2_op_stp:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("stp:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("stp:  Data IS READY");
+					end
+				end
+				
+				// 16-bit Push/pop style instructions:
+				// (Add 1 the reg pair rBp, then LoaD contents into reg
+				// pair rAp from memory at address contained in reg pair
+				// rBp)
+				pkg_instr_dec::instr_g2_op_ldpab:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldpab:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						set_reg_pair_with_pi( final_ig2_ra_index,
+							temp_data_in );
+						$display("ldpab:  Data IS READY");
+					end
+				end
+				
+				// (STore reg Pair rAp to memory at address contained in
+				// reg pair rBp, then Subtract 1 from the reg pair rBp)
+				pkg_instr_dec::instr_g2_op_stpsa:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("stpsa:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("stpsa:  Data IS READY");
+					end
+				end
+				
 				
 				default:
 				begin
@@ -305,6 +346,39 @@ task finish_exec_ldst_instr;
 					end
 				end
 				
+				
+				pkg_instr_dec::instr_g3_op_ldpx:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldpx:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						//$display( "ldpx:  %h %h", final_ig3_ra_index,
+						//	temp_data_in );
+						//`get_final_ig3_reg_a <= temp_data_in;
+						set_reg_pair_with_pi( final_ig3_ra_index, 
+							temp_data_in );
+						$display("ldpx:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g3_op_stpx:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("stpx:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("stpx:  Data IS READY");
+					end
+				end
+				
 				default:
 				begin
 					$display( "finish_exec_ldst_instr:  Uh oh!  ",
@@ -331,7 +405,6 @@ task finish_exec_ldst_instr;
 					
 					else // if (data_ready)
 					begin
-						//`get_final_ig5_reg_a <= temp_data_in;
 						set_reg( final_ig5_ra_index, temp_data_in );
 						$display("ldrxi:  Data IS READY");
 					end
@@ -348,6 +421,35 @@ task finish_exec_ldst_instr;
 					else // if (data_ready)
 					begin
 						$display("strxi:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g5_op_ldpxi:
+				begin
+					if (!data_ready)
+					begin
+						$display("ldpxi:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						set_reg_pair_with_pi( final_ig5_ra_index, 
+							temp_data_in );
+						$display("ldpxi:  Data IS READY");
+					end
+				end
+				
+				pkg_instr_dec::instr_g5_op_stpxi:
+				begin
+					// Wait a cycle
+					if (!data_ready)
+					begin
+						$display("stpxi:  Data NOT ready");
+					end
+					
+					else // if (data_ready)
+					begin
+						$display("stpxi:  Data IS READY");
 					end
 				end
 				

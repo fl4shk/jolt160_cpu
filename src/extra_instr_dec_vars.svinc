@@ -63,11 +63,13 @@ wire [`instr_g3_op_msb_pos:0] ig3_opcode;
 wire [`cpu_reg_index_ie_msb_pos:0] ig3_ra_index;
 wire [`cpu_reg_index_ie_msb_pos:0] ig3_rbp_index;
 wire [`cpu_reg_index_ie_msb_pos:0] ig3_rcp_index;
+wire ig3_ra_index_is_for_pair;
 
 bit [`instr_g3_op_msb_pos:0] final_ig3_opcode;
 bit [`cpu_reg_index_ie_msb_pos:0] final_ig3_ra_index;
 bit [`cpu_reg_index_ie_msb_pos:0] final_ig3_rbp_index;
 bit [`cpu_reg_index_ie_msb_pos:0] final_ig3_rcp_index;
+bit final_ig3_ra_index_is_for_pair;
 
 //wire ig3_instr_changes_pc;
 bit final_ig3_pc_contains_ra, final_ig3_rbp_is_pc, final_ig3_rcp_is_pc;
@@ -99,7 +101,8 @@ bit final_ig5_ra_index_is_for_pair;
 
 bit final_ig5_pc_contains_ra, final_ig5_rap_is_pc, final_ig5_rbp_is_pc;
 
-// If the instruction is a branch or call instruction (or reti)
+// If the instruction is a branch or call instruction (or reti, jump,
+// jumpi, or jumpira)
 bit instr_is_branch_or_call;
 // If the pc was POSSIBLY changed by a non-branch, non-call
 // instruction

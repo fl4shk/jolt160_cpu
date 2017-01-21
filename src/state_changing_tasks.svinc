@@ -81,6 +81,18 @@ task prep_load_16_with_addr;
 	prep_load_16_no_addr();
 endtask
 
+// Prepare to, on the next cycle, write a 16-bit value
+task prep_store_16;
+	input [`cpu_data_inout_16_msb_pos:0] write_data;
+	input [`cpu_addr_msb_pos:0] write_addr;
+	
+	data_inout_addr <= write_addr;
+	temp_data_out <= write_data;
+	data_acc_sz <= pkg_cpu::cpu_data_acc_sz_16;
+	data_inout_we <= 1;
+	req_rdwr <= 1;
+endtask
+
 
 
 task set_curr_state;

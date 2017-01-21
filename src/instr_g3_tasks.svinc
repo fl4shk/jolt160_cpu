@@ -20,6 +20,7 @@
 
 
 `define get_final_ig3_reg_a cpu_regs[final_ig3_ra_index]
+`define get_final_ig3_rpair_a `make_reg_pair_w_pi(final_ig3_ra_index)
 `define get_final_ig3_rpair_b `make_reg_pair_w_pi(final_ig3_rbp_index)
 `define get_final_ig3_rpair_c `make_reg_pair_w_pi(final_ig3_rcp_index)
 
@@ -55,6 +56,24 @@ task disassemble_grp_3_instr;
 			`make_reg_ind_from_pi(final_ig3_rcp_index) );
 	end
 	
+	// (Load 16-bit value from memory at address [rBp + rCp] into rAp)
+	if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_ldpx )
+	begin
+		$display( "ldpx r%dp, r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig3_ra_index),
+			`make_reg_ind_from_pi(final_ig3_rbp_index), 
+			`make_reg_ind_from_pi(final_ig3_rcp_index) );
+	end
+	
+	// (Store rAp to memory at address [rBp + rCp])
+	if ( final_ig3_opcode == pkg_instr_dec::instr_g3_op_stpx )
+	begin
+		$display( "stpx r%dp, r%dp, r%dp", 
+			`make_reg_ind_from_pi(final_ig3_ra_index),
+			`make_reg_ind_from_pi(final_ig3_rbp_index), 
+			`make_reg_ind_from_pi(final_ig3_rcp_index) );
+	end
+	
 	else
 	begin
 		$display("Unknown group 3 instruction!");
@@ -79,8 +98,9 @@ endtask
 
 task back_up_ig3_instr_contents;
 	{ final_ig3_opcode, final_ig3_ra_index, final_ig3_rbp_index,
-		final_ig3_rcp_index }
-		<= { ig3_opcode, ig3_ra_index, ig3_rbp_index, ig3_rcp_index };
+		final_ig3_rcp_index, final_ig3_ra_index_is_for_pair }
+		<= { ig3_opcode, ig3_ra_index, ig3_rbp_index, ig3_rcp_index,
+		ig3_ra_index_is_for_pair };
 endtask
 
 
@@ -106,7 +126,7 @@ task prep_alu_instr_grp_3_generic;
 		// Load 8-bit value from memory at address [rBp + rCp] into rA
 		pkg_instr_dec::instr_g3_op_ldrx:
 		begin
-			do_alu_op_addp_no_flags( rbp_index,
+			do_alu_op_add_no_flags( rbp_index,
 				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
 				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1'b1 ]);
 		end
@@ -114,7 +134,22 @@ task prep_alu_instr_grp_3_generic;
 		// Store rA to memory at address [rBp + rCp]
 		pkg_instr_dec::instr_g3_op_strx:
 		begin
-			do_alu_op_addp_no_flags( rbp_index,
+			do_alu_op_add_no_flags( rbp_index,
+				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1'b1 ]);
+		end
+		
+		// (Load 16-bit value from memory at address [rBp + rCp] into rAp)
+		pkg_instr_dec::instr_g3_op_ldpx:
+		begin
+			do_alu_op_add_no_flags( rbp_index,
+				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
+				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1'b1 ]);
+		end
+		// (Store rAp to memory at address [rBp + rCp])
+		pkg_instr_dec::instr_g3_op_stpx :
+		begin
+			do_alu_op_add_no_flags( rbp_index,
 				cpu_regs[`make_reg_ind_from_pi(rcp_index)],
 				cpu_regs[ `make_reg_ind_from_pi(rcp_index) + 1'b1 ]);
 		end
@@ -153,6 +188,19 @@ task start_exec_instr_from_grp_3;
 			//prep_store_8( `get_final_ig3_reg_a, ( `get_final_ig3_rpair_b 
 			//	+ `get_final_ig3_rpair_c ) );
 			prep_store_8( `get_final_ig3_reg_a, `get_alu_out_16 );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
+		// (Load 16-bit value from memory at address [rBp + rCp] into rAp)
+		pkg_instr_dec::instr_g3_op_ldpx:
+		begin
+			prep_load_16_with_addr(`get_alu_out_16);
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		// (Store rAp to memory at address [rBp + rCp])
+		pkg_instr_dec::instr_g3_op_stpx :
+		begin
+			prep_store_16( `get_final_ig3_rpair_a, `get_alu_out_16 );
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
 		

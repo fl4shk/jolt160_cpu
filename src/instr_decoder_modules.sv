@@ -147,19 +147,25 @@ module instr_grp_3_decoder
 		output bit [`instr_g3_op_msb_pos:0] opcode,
 		output bit [`cpu_reg_index_ie_msb_pos:0] ra_index,
 		output bit [`cpu_reg_index_ie_msb_pos:0] rbp_index,
-		output bit [`cpu_reg_index_ie_msb_pos:0] rcp_index );
+		output bit [`cpu_reg_index_ie_msb_pos:0] rcp_index,
+		output bit ra_index_is_for_pair );
 	
 	import pkg_instr_dec::*;
 	
 	//assign { opcode, ra_index, rbp_index, rcp_index } 
 	//	= instr_hi[`instr_g3_op_range_hi:`instr_g3_rcp_index_range_lo];
 	assign opcode = instr_hi[`instr_g3_op_range_hi:`instr_g3_op_range_lo];
+	
+	assign ra_index_is_for_pair
+		= ig3_get_ra_index_is_for_pair(opcode);
+	
 	assign ra_index = instr_hi[ `instr_g3_ra_index_range_hi 
-		: `instr_g3_ra_index_range_lo ];
+		: `instr_g3_ra_index_range_lo ] >> ra_index_is_for_pair;
 	assign rbp_index = instr_hi[ `instr_g3_rbp_index_range_hi 
 		: `instr_g3_rbp_index_range_lo ];
 	assign rcp_index = instr_hi[ `instr_g3_rcp_index_range_hi 
 		: `instr_g3_rcp_index_range_lo ];
+	
 	
 endmodule
 

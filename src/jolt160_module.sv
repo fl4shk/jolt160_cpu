@@ -188,7 +188,8 @@ module jolt160
 		.opcode(ig3_opcode), 
 		.ra_index(ig3_ra_index),
 		.rbp_index(ig3_rbp_index), 
-		.rcp_index(ig3_rcp_index) );
+		.rcp_index(ig3_rcp_index),
+		.ra_index_is_for_pair(ig3_ra_index_is_for_pair) );
 	instr_grp_4_decoder instr_grp_4_dec( .instr_hi(temp_data_in),
 		.opcode(ig4_opcode), 
 		.imm_value_8(ig4_imm_value_8) );

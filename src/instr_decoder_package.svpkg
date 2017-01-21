@@ -299,13 +299,8 @@ package pkg_instr_dec;
 	{
 		// Extended copy instructions:
 		
-		// (COPY Pair Immediate, which sets the a register pair rAp to a
-		// 16-bit value in one instruction, but in twice the number of
-		// cycles due to using more than two bytes [can be used a as a jump
-		// immediate by copying a 16-bit immediate value to the pc] [this
-		// instruction ONLY has an advantage over using two successive cpyi
-		// instructions when used to copy a 16-bit immediate value to the
-		// pc])
+		// (COPY Immediate, which sets the a register pair rAp to a 16-bit
+		// value in one instruction)
 		instr_g5_op_cpyi,
 		
 		// (Sets the PC to a 16-bit immediate value)

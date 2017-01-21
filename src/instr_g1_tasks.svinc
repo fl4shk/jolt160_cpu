@@ -35,57 +35,111 @@ endtask
 
 task disassemble_grp_1_instr;
 	
+	//// Arithmetic instructions:
+	//if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
+	//begin
+	//	$display( "addi r%d, $%h", final_ig1_ra_index,
+	//		final_ig1_imm_value_8 );
+	//end
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
+	//begin
+	//	$display( "adci r%d, $%h", final_ig1_ra_index,
+	//		final_ig1_imm_value_8 );
+	//end
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addpbi )
+	//begin
+	//	$display( "addpbi r%dp, $%h", 
+	//		`make_reg_ind_from_pi(final_ig1_ra_index),
+	//		final_ig1_imm_value_8 );
+	//end
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_subpbi )
+	//begin
+	//	$display( "subpbi r%dp, $%h", 
+	//		`make_reg_ind_from_pi(final_ig1_ra_index),
+	//		final_ig1_imm_value_8 );
+	//end
+	//
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
+	//begin
+	//	$display( "cmpi r%d, $%h", final_ig1_ra_index,
+	//		final_ig1_imm_value_8 );
+	//end
+	//
+	//
+	//// Bitwise instructions with two operands:
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_andi )
+	//begin
+	//	$display( "andi r%d, $%h", final_ig1_ra_index,
+	//		final_ig1_imm_value_8 );
+	//end
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_orri )
+	//begin
+	//	$display( "orri r%d, $%h", final_ig1_ra_index,
+	//		final_ig1_imm_value_8 );
+	//end
+	//
+	////Copy instructions:
+	//
+	//// (CoPY Immediate)
+	//else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
+	//begin
+	//	$display( "cpyi r%d, $%h", final_ig1_ra_index,
+	//		final_ig1_imm_value_8 );
+	//end
+	
 	// Arithmetic instructions:
+	// (ADD 8-bit Immediate value to reg Pair rAp)
 	if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addi )
 	begin
-		$display( "addi r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_adci )
-	begin
-		$display( "adci r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_addpbi )
-	begin
-		$display( "addpbi r%dp, $%h", 
+		$display( "addi r%dp, $%h", 
 			`make_reg_ind_from_pi(final_ig1_ra_index),
 			final_ig1_imm_value_8 );
 	end
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_subpbi )
+	// (SuBtract 8-bit Immediate value from reg Pair rAp)
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_subi )
 	begin
-		$display( "subpbi r%dp, $%h", 
+		$display( "subi r%dp, $%h", 
 			`make_reg_ind_from_pi(final_ig1_ra_index),
 			final_ig1_imm_value_8 );
 	end
-	
+	// (CoMPare reg pair rAp to 8-bit Immediate value)
 	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cmpi )
 	begin
-		$display( "cmpi r%d, $%h", final_ig1_ra_index,
+		$display( "cmpi r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
 			final_ig1_imm_value_8 );
 	end
 	
-	
-	// Bitwise instructions with two operands:
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_andi )
+	// Bitshifting instructions with two operands (rAp and 8-bit
+	// Immediate value):
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_lsli )
 	begin
-		$display( "andi r%d, $%h", final_ig1_ra_index,
+		$display( "lsli r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
 			final_ig1_imm_value_8 );
 	end
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_orri )
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_lsri )
 	begin
-		$display( "orri r%d, $%h", final_ig1_ra_index,
+		$display( "lsri r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
+			final_ig1_imm_value_8 );
+	end
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_asri )
+	begin
+		$display( "asri r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig1_ra_index),
+			final_ig1_imm_value_8 );
+	end
+	  
+	// Copy instructions:
+	
+	// (CoPY Byte Immediate to register rA)
+	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpybi )
+	begin
+		$display( "cpybi r%d, $%h", final_ig1_ra_index,
 			final_ig1_imm_value_8 );
 	end
 	
-	//Copy instructions:
-	
-	// (CoPY Immediate)
-	else if ( final_ig1_opcode == pkg_instr_dec::instr_g1_op_cpyi )
-	begin
-		$display( "cpyi r%d, $%h", final_ig1_ra_index,
-			final_ig1_imm_value_8 );
-	end
 	
 	else
 	begin
@@ -140,48 +194,97 @@ task prep_alu_instr_grp_1_generic;
 	input [`instr_g1_imm_value_msb_pos:0] imm_value_8;
 	
 	
+	//case (opcode)
+	//	// Arithmetic instructions:
+	//	pkg_instr_dec::instr_g1_op_addi:
+	//	begin
+	//		do_alu_op_add( ra_index, imm_value_8 );
+	//	end
+	//	
+	//	pkg_instr_dec::instr_g1_op_adci:
+	//	begin
+	//		do_alu_op_adc( ra_index, imm_value_8 );
+	//	end
+	//	
+	//	pkg_instr_dec::instr_g1_op_addpbi:
+	//	begin
+	//		do_alu_op_addpb( ra_index, imm_value_8 );
+	//	end
+	//	pkg_instr_dec::instr_g1_op_subpbi:
+	//	begin
+	//		do_alu_op_subpb( ra_index, imm_value_8 );
+	//	end
+	//	
+	//	pkg_instr_dec::instr_g1_op_cmpi:
+	//	begin
+	//		do_alu_op_cmp( ra_index, imm_value_8 );
+	//	end
+	//	
+	//	// Bitwise instructions with two operands:
+	//	pkg_instr_dec::instr_g1_op_andi:
+	//	begin
+	//		do_alu_op_and( ra_index, imm_value_8 );
+	//	end
+	//	pkg_instr_dec::instr_g1_op_orri:
+	//	begin
+	//		do_alu_op_orr( ra_index, imm_value_8 );
+	//	end
+	//	
+	//	//Copy instructions:
+	//	
+	//	// (CoPY Immediate)
+	//	//pkg_instr_dec::instr_g1_op_cpyi:
+	//	//begin
+	//	//end
+	//	default:
+	//	begin
+	//		alu_was_used <= 0;
+	//	end
+	//endcase
+	
 	case (opcode)
 		// Arithmetic instructions:
+		// (ADD 8-bit Immediate value to reg Pair rAp)
 		pkg_instr_dec::instr_g1_op_addi:
 		begin
-			do_alu_op_add( ra_index, imm_value_8 );
+			do_alu_op_add( ra_index, `cpu_imm_value_8_width'h0, 
+				imm_value_8 );
 		end
-		
-		pkg_instr_dec::instr_g1_op_adci:
+		// (SuBtract 8-bit Immediate value from reg Pair rAp)
+		pkg_instr_dec::instr_g1_op_subi:
 		begin
-			do_alu_op_adc( ra_index, imm_value_8 );
+			do_alu_op_sub( ra_index, `cpu_imm_value_8_width'h0, 
+				imm_value_8 );
 		end
-		
-		pkg_instr_dec::instr_g1_op_addpbi:
-		begin
-			do_alu_op_addpb( ra_index, imm_value_8 );
-		end
-		pkg_instr_dec::instr_g1_op_subpbi:
-		begin
-			do_alu_op_subpb( ra_index, imm_value_8 );
-		end
-		
+		// (CoMPare reg pair rAp to 8-bit Immediate value)
 		pkg_instr_dec::instr_g1_op_cmpi:
 		begin
-			do_alu_op_cmp( ra_index, imm_value_8 );
+			do_alu_op_cmp( ra_index, `cpu_imm_value_8_width'h0, 
+				imm_value_8 );
 		end
 		
-		// Bitwise instructions with two operands:
-		pkg_instr_dec::instr_g1_op_andi:
+		// Bitshifting instructions with two operands (rAp and 8-bit
+		// Immediate value):
+		pkg_instr_dec::instr_g1_op_lsli:
 		begin
-			do_alu_op_and( ra_index, imm_value_8 );
+			do_alu_op_lsl( ra_index, `cpu_imm_value_8_width'h0, 
+				imm_value_8 );
 		end
-		pkg_instr_dec::instr_g1_op_orri:
+		pkg_instr_dec::instr_g1_op_lsri:
 		begin
-			do_alu_op_orr( ra_index, imm_value_8 );
+			do_alu_op_lsr( ra_index, `cpu_imm_value_8_width'h0, 
+				imm_value_8 );
 		end
+		pkg_instr_dec::instr_g1_op_asri:
+		begin
+			do_alu_op_asr( ra_index, `cpu_imm_value_8_width'h0, 
+				imm_value_8 );
+		end
+		  
+		// Copy instructions:
 		
-		//Copy instructions:
-		
-		// (CoPY Immediate)
-		//pkg_instr_dec::instr_g1_op_cpyi:
-		//begin
-		//end
+		//// (CoPY Byte Immediate to register rA)
+		//instr_g1_op_cpybi
 		default:
 		begin
 			alu_was_used <= 0;
@@ -207,72 +310,114 @@ task start_exec_instr_from_grp_1;
 	
 	disassemble_grp_1_instr();
 	
+	//case (final_ig1_opcode)
+	//	// Arithmetic instructions:
+	//	pkg_instr_dec::instr_g1_op_addi:
+	//	begin
+	//		//$display( "addi r%d, $%h", final_ig1_ra_index,
+	//		//	final_ig1_imm_value_8 );
+	//		
+	//		//cpu_regs[final_ig1_ra_index] <= cpu_regs[final_ig1_ra_index]
+	//		//	+ final_ig1_imm_value_8;
+	//		
+	//		//$display( "%h %h %h", alu_was_used
+	//		
+	//		//cpu_regs[final_ig1_ra_index]
+	//		//`get_final_ig1_reg_a <= `get_alu_out_8;
+	//		//
+	//		//true_proc_flags
+	//		//$display( "addi:  %h" );
+	//		finish_alu_op_with_dest_reg();
+	//	end
+	//	
+	//	pkg_instr_dec::instr_g1_op_adci:
+	//	begin
+	//		finish_alu_op_with_dest_reg();
+	//	end
+	//	
+	//	pkg_instr_dec::instr_g1_op_addpbi:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	pkg_instr_dec::instr_g1_op_subpbi:
+	//	begin
+	//		finish_alu_op_with_dest_rpair();
+	//	end
+	//	
+	//	
+	//	pkg_instr_dec::instr_g1_op_cmpi:
+	//	begin
+	//		finish_alu_op_with_dest_reg();
+	//	end
+	//	
+	//	// Bitwise instructions with two operands:
+	//	pkg_instr_dec::instr_g1_op_andi:
+	//	begin
+	//		finish_alu_op_with_dest_reg();
+	//	end
+	//	pkg_instr_dec::instr_g1_op_orri:
+	//	begin
+	//		finish_alu_op_with_dest_reg();
+	//	end
+	//	
+	//	
+	//	//Copy instructions:
+	//	
+	//	// (CoPY Immediate)
+	//	pkg_instr_dec::instr_g1_op_cpyi:
+	//	begin
+	//		//`get_final_ig1_reg_a <= final_ig1_imm_value_8;
+	//		set_reg( final_ig1_ra_index, final_ig1_imm_value_8 );
+	//	end
+	//	
+	//	default:
+	//	begin
+	//		$display("Unknown group 1 instruction!");
+	//	end
+	//endcase
+	
+	
 	case (final_ig1_opcode)
 		// Arithmetic instructions:
+		// (ADD 8-bit Immediate value to reg Pair rAp)
 		pkg_instr_dec::instr_g1_op_addi:
 		begin
-			//$display( "addi r%d, $%h", final_ig1_ra_index,
-			//	final_ig1_imm_value_8 );
-			
-			//cpu_regs[final_ig1_ra_index] <= cpu_regs[final_ig1_ra_index]
-			//	+ final_ig1_imm_value_8;
-			
-			//$display( "%h %h %h", alu_was_used
-			
-			//cpu_regs[final_ig1_ra_index]
-			//`get_final_ig1_reg_a <= `get_alu_out_8;
-			//
-			//true_proc_flags
-			//$display( "addi:  %h" );
-			finish_alu_op_with_dest_reg();
+			finish_alu_op_with_dest_rpair();
 		end
-		
-		pkg_instr_dec::instr_g1_op_adci:
-		begin
-			finish_alu_op_with_dest_reg();
-		end
-		
-		pkg_instr_dec::instr_g1_op_addpbi:
+		// (SuBtract 8-bit Immediate value from reg Pair rAp)
+		pkg_instr_dec::instr_g1_op_subi:
 		begin
 			finish_alu_op_with_dest_rpair();
 		end
-		pkg_instr_dec::instr_g1_op_subpbi:
-		begin
-			finish_alu_op_with_dest_rpair();
-		end
-		
-		
+		// (CoMPare reg pair rAp to 8-bit Immediate value)
 		pkg_instr_dec::instr_g1_op_cmpi:
 		begin
-			finish_alu_op_with_dest_reg();
+			finish_alu_op_with_dest_rpair();
 		end
 		
-		// Bitwise instructions with two operands:
-		pkg_instr_dec::instr_g1_op_andi:
+		// Bitshifting instructions with two operands (rAp and 8-bit
+		// Immediate value):
+		pkg_instr_dec::instr_g1_op_lsli:
 		begin
-			finish_alu_op_with_dest_reg();
+			finish_alu_op_with_dest_rpair();
 		end
-		pkg_instr_dec::instr_g1_op_orri:
+		pkg_instr_dec::instr_g1_op_lsri:
 		begin
-			finish_alu_op_with_dest_reg();
+			finish_alu_op_with_dest_rpair();
 		end
-		
-		
-		//Copy instructions:
-		
-		// (CoPY Immediate)
-		pkg_instr_dec::instr_g1_op_cpyi:
+		pkg_instr_dec::instr_g1_op_asri:
 		begin
-			//`get_final_ig1_reg_a <= final_ig1_imm_value_8;
+			finish_alu_op_with_dest_rpair();
+		end
+		  
+		// Copy instructions:
+		
+		// (CoPY Byte Immediate to register rA)
+		pkg_instr_dec::instr_g1_op_cpybi:
+		begin
 			set_reg( final_ig1_ra_index, final_ig1_imm_value_8 );
 		end
-		
-		default:
-		begin
-			$display("Unknown group 1 instruction!");
-		end
 	endcase
-	
 	
 	if (!final_ig1_instr_is_ldst)
 	begin

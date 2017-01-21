@@ -42,18 +42,19 @@ task disassemble_grp_5_instr;
 	
 	// Extended copy instructions:
 	
-	// (COPY Pair Immediate, which sets the a register pair rAp to a
-	// 16-bit value in one instruction, but in twice the number of
-	// cycles due to using more than two bytes [can be used a as a jump
-	// immediate by copying a 16-bit immediate value to the pc] [this
-	// instruction ONLY has an advantage over using two successive cpyi
-	// instructions when used to copy a 16-bit immediate value to the
-	// pc])
+	// (COPY Immediate, which sets the a register pair rAp to a 16-bit
+	// value in one instruction)
 	//$display( "final_ig5_opcode:  %d", final_ig5_opcode );
-	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
+	if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpyi )
 	begin
-		$display( "cpypi r%dp, $%h", 
+		$display( "cpyi r%dp, $%h", 
 			`make_reg_ind_from_pi(final_ig5_ra_index), instr_in_lo );
+	end
+	
+	// (Sets the PC to a 16-bit immediate value)
+	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_jumpi )
+	begin
+		$display( "jumpi $%h", instr_in_lo );
 	end
 	
 	// Call instructions
@@ -80,6 +81,22 @@ task disassemble_grp_5_instr;
 	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_strxi )
 	begin
 		$display( "strxi r%d, r%dp, $%h", final_ig5_ra_index,
+			`make_reg_ind_from_pi(final_ig5_rbp_index), instr_in_lo );
+	end
+	
+	// (Load 16-bit value from memory at address [rBp + 16-bit Immediate
+	// value] into rAp)
+	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_ldpxi )
+	begin
+		$display( "ldpxi r%dp, r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig5_ra_index), 
+			`make_reg_ind_from_pi(final_ig5_rbp_index), instr_in_lo );
+	end
+	// (Store rAp to memory at address [rBp + 16-bit Immediate value])
+	else if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_stpxi )
+	begin
+		$display( "stpxi r%dp, r%dp, $%h", 
+			`make_reg_ind_from_pi(final_ig5_ra_index), 
 			`make_reg_ind_from_pi(final_ig5_rbp_index), instr_in_lo );
 	end
 	
@@ -163,7 +180,7 @@ task prep_alu_instr_grp_5_generic;
 			//	imm_value_16[ `cpu_imm_value_16_msb_pos
 			//	: `cpu_imm_value_8_width ],
 			//	imm_value_16[`cpu_imm_value_8_msb_pos:0] );
-			do_alu_op_addp_no_flags( rbp_index,
+			do_alu_op_add_no_flags( rbp_index,
 				imm_value_16[ `cpu_imm_value_16_msb_pos
 				: `cpu_imm_value_8_width ],
 				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
@@ -176,7 +193,26 @@ task prep_alu_instr_grp_5_generic;
 			//	imm_value_16[ `cpu_imm_value_16_msb_pos
 			//	: `cpu_imm_value_8_width ],
 			//	imm_value_16[`cpu_imm_value_8_msb_pos:0] );
-			do_alu_op_addp_no_flags( rbp_index,
+			do_alu_op_add_no_flags( rbp_index,
+				imm_value_16[ `cpu_imm_value_16_msb_pos
+				: `cpu_imm_value_8_width ],
+				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
+		end
+		
+		// (Load 16-bit value from memory at address [rBp + 16-bit Immediate
+		// value] into rAp)
+		pkg_instr_dec::instr_g5_op_ldpxi:
+		begin
+			do_alu_op_add_no_flags( rbp_index,
+				imm_value_16[ `cpu_imm_value_16_msb_pos
+				: `cpu_imm_value_8_width ],
+				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
+		end
+		
+		// (Store rAp to memory at address [rBp + 16-bit Immediate value])
+		pkg_instr_dec::instr_g5_op_stpxi:
+		begin
+			do_alu_op_add_no_flags( rbp_index,
 				imm_value_16[ `cpu_imm_value_16_msb_pos
 				: `cpu_imm_value_8_width ],
 				imm_value_16[`cpu_imm_value_8_msb_pos:0] );
@@ -200,7 +236,7 @@ task start_exec_instr_from_grp_5;
 	
 	disassemble_grp_5_instr();
 	
-	//if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpypi )
+	//if ( final_ig5_opcode == pkg_instr_dec::instr_g5_op_cpyi )
 	//begin
 	//	//$display( "%h %h %h %h", final_ig5_other_rap_index,
 	//	//	final_ig5_rap_is_pc, instr_in_lo,
@@ -213,17 +249,19 @@ task start_exec_instr_from_grp_5;
 		
 		// Extended copy instructions:
 		
-		// (COPY Pair Immediate, which sets the a register pair rAp to a
-		// 16-bit value in one instruction, but in twice the number of
-		// cycles due to using more than two bytes [can be used a as a jump
-		// immediate by copying a 16-bit immediate value to the pc] [this
-		// instruction ONLY has an advantage over using two successive cpyi
-		// instructions when used to copy a 16-bit immediate value to the
-		// pc])
-		pkg_instr_dec::instr_g5_op_cpypi:
+		// (COPY Immediate, which sets the a register pair rAp to a 16-bit
+		// value in one instruction)
+		pkg_instr_dec::instr_g5_op_cpyi:
 		begin
 			//`get_final_ig5_rpair_a <= instr_in_lo;
 			set_reg_pair_with_pi( final_ig5_ra_index, instr_in_lo );
+		end
+		
+		// (Sets the PC to a 16-bit immediate value)
+		pkg_instr_dec::instr_g5_op_jumpi:
+		begin
+			set_reg_pair_with_pi( pkg_cpu::cpu_rp_pc_pind, 
+				instr_in_lo );
 		end
 		
 		// Call instructions
@@ -233,18 +271,6 @@ task start_exec_instr_from_grp_5;
 		// address)
 		pkg_instr_dec::instr_g5_op_calli:
 		begin
-			//$display( "calli:  %h %h %h %h", `get_cpu_rp_pc,
-			//	`get_pc_after_reg_instr, instr_in_lo,
-			//	instr_is_branch_or_call );
-			//`get_cpu_rp_lr <= `get_pc_after_reg_instr;
-			//`get_cpu_rp_pc <= instr_in_lo;
-			
-			//`get_cpu_rp_lr <= `get_cpu_rp_pc;
-			//
-			//set_pc_and_dio_addr(instr_in_lo);
-			
-			// No need to do anything to instr_in_lo because I'm not sure
-			// why
 			exec_any_call(instr_in_lo);
 		end
 		
@@ -254,36 +280,6 @@ task start_exec_instr_from_grp_5;
 		// value] into rA)
 		pkg_instr_dec::instr_g5_op_ldrxi:
 		begin
-			////$display("instr_g5_op_ldrxi:  %h %h %h\t\t%d",
-			////	`get_final_ig5_rpair_b, instr_in_lo,
-			////	( `get_final_ig5_rpair_b + instr_in_lo ),
-			////	final_ig5_rbp_index );
-			//
-			//if (!data_ready)
-			//begin
-			//	if (!did_prep_ldst_instr)
-			//	begin
-			//		did_prep_ldst_instr <= 1;
-			//		prep_load_8_with_addr( `get_final_ig5_rpair_b
-			//			+ instr_in_lo );
-			//	end
-			//	
-			//	else
-			//	begin
-			//		req_rdwr <= 0;
-			//	end
-			//end
-			//
-			//else // if (data_ready)
-			//begin
-			//	did_prep_ldst_instr <= 0;
-			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			//end
-			
-			
-			
-			//// This 16-bit addition SHOULD use the ALU
-			////prep_load_8_with_addr( `get_final_ig5_rpair_b + instr_in_lo );
 			prep_load_8_with_addr(`get_alu_out_16);
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
@@ -291,46 +287,24 @@ task start_exec_instr_from_grp_5;
 		// (Store rA to memory at address [rBp + 16-bit Immediate value])
 		pkg_instr_dec::instr_g5_op_strxi:
 		begin
-			////$display( "strxi:  %h, %h, %h, %h", temp_data_in,
-			////	`get_final_ig5_rpair_b, instr_in_lo, 
-			////	( `get_final_ig5_rpair_b + instr_in_lo ) );
-			////$display( "strxi:  r%dp", final_ig5_ra_index );
-			////$display( "strxi:  %h %h", 
-			////	instr_in_hi[ `instr_g5_ihi_ra_index_range_hi
-			////	: `instr_g5_ihi_ra_index_range_lo ],
-			////	instr_in_hi[ `instr_g5_ihi_rbp_index_range_hi
-			////	: `instr_g5_ihi_rbp_index_range_lo ] );
-			//
-			//if (!data_ready)
-			//begin
-			//	if (!did_prep_ldst_instr)
-			//	begin
-			//		did_prep_ldst_instr <= 1;
-			//		prep_store_8( `get_final_ig5_reg_a, 
-			//			( `get_final_ig5_rpair_b + instr_in_lo ) );
-			//	end
-			//	
-			//	else
-			//	begin
-			//		req_rdwr <= 0;
-			//	end
-			//end
-			//
-			////else // if (data_ready)
-			//if (data_ready)
-			//begin
-			//	did_prep_ldst_instr <= 0;
-			//	curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
-			//end
-			
-			
-			
-			//// This 16-bit addition SHOULD use the ALU
-			//prep_store_8( `get_final_ig5_reg_a, 
-			//	( `get_final_ig5_rpair_b + instr_in_lo ) );
 			prep_store_8( `get_final_ig5_reg_a, `get_alu_out_16 );
 			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
 		end
+		
+		// (Load 16-bit value from memory at address [rBp + 16-bit Immediate
+		// value] into rAp)
+		pkg_instr_dec::instr_g5_op_ldpxi:
+		begin
+			prep_load_16_with_addr(`get_alu_out_16);
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		// (Store rAp to memory at address [rBp + 16-bit Immediate value])
+		pkg_instr_dec::instr_g5_op_stpxi:
+		begin
+			prep_store_16( `get_final_ig5_rpair_a, `get_alu_out_16 );
+			curr_state <= pkg_cpu::cpu_st_finish_exec_ldst_instr;
+		end
+		
 		
 		default:
 		begin
